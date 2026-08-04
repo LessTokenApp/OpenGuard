@@ -216,6 +216,168 @@ Activity log entry:
 
 ---
 
+## User Education & Risk Messaging Strategy
+
+### The Problem: False Sense of Security
+
+Users might think "OpenGuard = I'm fully protected" and:
+- ❌ Skip using VPN (WiFi still unencrypted)
+- ❌ Enter passwords on unencrypted connections
+- ❌ Download files without antivirus scanning
+- ❌ Visit phishing sites thinking they're safe
+
+**Our responsibility:** Persistently remind users of limitations.
+
+### Education Touchpoints
+
+**1. Onboarding Wizard (Screen 2: What it protects)**
+```
+✅ DNS Spoofing
+✅ MITM Attacks  
+✅ Network Sniffing
+✅ Gateway Anomalies
+
+⚠️  IMPORTANT:
+OpenGuard hardens your network but DOES NOT:
+❌ Encrypt your traffic
+❌ Protect web apps from attacks
+❌ Stop malware execution
+
+RECOMMENDATION: Use with a VPN for full privacy.
+```
+
+**2. Dashboard (Always Visible Warning)**
+```
+┌─────────────────────────────────────┐
+│ 💡 Pro Tip: Using public WiFi?      │
+│ Combine OpenGuard + VPN for full    │
+│ protection. ▶ Learn more             │
+└─────────────────────────────────────┘
+(Dismissible, but re-appears daily)
+```
+
+**3. Help Section (Prominent)**
+```
+Help Menu:
+├─ What's Protected (DNS, firewall, network anomalies)
+├─ ⚠️  What's NOT Protected (WiFi encryption, apps, malware)
+├─ VPN Integration Guide
+├─ Best Practices for Public WiFi
+└─ FAQ
+```
+
+**4. Settings → Recommendations**
+```
+🎨 APPEARANCE
+├─ Dark Mode: ☑
+├─ Auto-start: ☑
+├─ Show daily tips: ☑  ← Key setting
+
+💡 RECOMMENDED PRACTICES
+├─ [✓] Use with VPN
+├─ [ ] Keep antivirus updated
+├─ [ ] Use HTTPS always
+├─ [ ] Enable 2FA for email
+└─ [Learn about each]
+```
+
+**5. Activity Log (Educational)**
+```
+Activity shown with category badges:
+🛡️  PROTECTED:
+  15:32 🛡️ DNS spoofing blocked
+  15:45 🛡️ Suspicious firewall rule blocked
+
+⚠️  NEEDS ATTENTION:
+  16:00 ⚠️ HTTPS downgrade detected
+        (Requires browser settings change)
+  16:15 ⚠️ Unencrypted data sent
+        (VPN would have encrypted this)
+
+ℹ️  INFORMATIONAL:
+  16:30 ℹ️ Gateway MAC changed
+        (This is normal when switching WiFi)
+```
+
+**6. Risk Badge on Dashboard**
+```
+Risk Assessment: LOW RISK
+(with expandable section)
+
+However:
+⚠️  "LOW RISK" = Network layer only
+     For complete safety:
+     □ Use a VPN (encrypts traffic)
+     □ Keep software updated (blocks exploits)
+     □ Enable 2FA on email (prevents account takeover)
+```
+
+**7. Email Alerts (PRO users, v0.8.0)**
+```
+Subject: Weekly Security Summary for Your Devices
+
+This week: 2 network threats blocked by OpenGuard ✓
+
+However, we detected:
+⚠️  5 HTTPS connections (unencrypted)
+⚠️  3 attempts to visit known phishing sites
+
+RECOMMENDATIONS:
+1. Consider using a VPN (e.g., ProtonVPN, NordVPN)
+2. Enable HTTPS-only mode in your browser
+3. Use Bitwarden for password management
+
+[View detailed report] [Settings]
+```
+
+### Messaging Framework
+
+**Always pair protection with limitation:**
+
+| Message | Why | Effect |
+|---------|-----|--------|
+| "🟢 Protected" | Status feedback | Builds trust |
+| "...but use VPN" | Limitation clarity | Prevents false security |
+| "DNS spoofing blocked" | Specific threat | Educational |
+| "WiFi not encrypted" | What we can't do | Realistic |
+| "Recommend: Antivirus" | Complementary tools | Holistic safety |
+
+### Implementation Details
+
+**v0.7.0 (Foundation):**
+- ✅ Onboarding education (wizard + help)
+- ✅ Dashboard tip banner (dismissible, re-appears)
+- ✅ Help section with clear limitations
+- ✅ Activity log with educational categories
+
+**v0.8.0 (Enhancement):**
+- ✅ PRO email alerts (weekly summary + recommendations)
+- ✅ Settings: Recommended practices checklist
+- ✅ VPN integration prompts
+
+**v0.9.0+ (Advanced):**
+- ⏳ VPN partner integration (ProtonVPN API)
+- ⏳ Browser security score
+- ⏳ Smart notifications (escalate if user ignores warnings)
+
+### Tone & Language Guidelines
+
+**DO:**
+- ✅ "OpenGuard blocks network-layer threats"
+- ✅ "For encryption, use a VPN"
+- ✅ "This is what we protect against..."
+- ✅ "This requires additional tools..."
+
+**DON'T:**
+- ❌ "You're completely safe" (false)
+- ❌ "VPN is optional" (misleading)
+- ❌ Hide limitations (unethical)
+- ❌ Use security buzzwords without explanation
+
+**Tone:** Helpful, not alarmist. Informative, not preachy.
+
+---
+
 ## UI Components
 
 ### 1. Main Window (Dashboard)
