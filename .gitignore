@@ -1,0 +1,23 @@
+# Windows
+*.exe
+*.bat
+Thumbs.db
+.DS_Store
+
+# PowerShell
+*.ps1xml
+*.psd1
+
+# Logs
+*.log
+security_log.jsonl
+
+# Config
+config.txt
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
