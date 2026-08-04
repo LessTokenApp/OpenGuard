@@ -133,6 +133,89 @@ OpenGuard-GUI/
 
 ---
 
+## Threat Detection & Real-Time Alerting
+
+### What OpenGuard Detects (Network Layer)
+
+| Threat Type | Detection Method | Response Time | Alert |
+|-------------|------------------|----------------|-------|
+| **DNS Spoofing** | Monitor DNS queries vs trusted providers | < 1 second | 🟡 Activity log + systray |
+| **MITM Attacks** | Monitor gateway MAC changes | ~5 seconds (polling) | 🔴 Activity log + systray |
+| **Suspicious Outbound** | Firewall rule violations | < 200ms | 🟡 Activity log |
+| **LLMNR Hijacking** | Block LLMNR queries | < 100ms | 🟡 Activity log |
+| **Gateway Anomaly** | Detect unauthorized gateway | ~5 seconds | 🔴 Activity log + email (PRO) |
+
+### Real-Time Alerting Flow
+
+**Scenario: User on public WiFi, attacker attempts DNS hijacking**
+
+```
+1. ATTACKER sends malicious DNS response
+   ↓
+2. OPENGUARD firewall/DNS filter intercepts
+   ↓
+3. Response blocked immediately (< 1 second)
+   ↓
+4. Activity log updated:
+   "15:32:45 🟡 DNS spoofing attempt blocked"
+   ↓
+5. DASHBOARD updates in real-time:
+   • Activity log shows new entry
+   • Systray icon blinks yellow (warning)
+   • Threat count increments
+   ↓
+6. PRO USER receives email alert (if enabled):
+   "Suspicious DNS query detected at 15:32"
+```
+
+### What OpenGuard DOES NOT Protect Against
+
+**⚠️ Important limitations (not network-layer threats):**
+
+| Threat | Why Not Protected | Solution |
+|--------|------------------|----------|
+| **WiFi encryption crack** (WEP, WPA brute-force) | Encryption layer, not application | Use VPN + WPA3 networks |
+| **Web app attacks** (SQL injection, XSS) | Application-layer, not network | Keep browser/apps patched |
+| **Malware execution** | Antivirus domain, not firewall | Use antivirus software |
+| **Phishing** | User decision, not technical | Security awareness training |
+| **HTTPS downgrade** | HSTS/pinning, not firewall | Enable HTTPS enforcement |
+| **Credential theft from apps** | App logic, not network | Use password manager + 2FA |
+
+**Key messaging for users:**
+> "OpenGuard hardens your network layer. For full privacy, use with a VPN. For app security, keep software updated."
+
+### Alert Channels
+
+**v0.7.0 (Foundation):**
+- ✅ Activity log (dashboard, real-time)
+- ✅ Systray icon states (🟢🟡🔴)
+- ✅ Dashboard notification dismissible
+
+**v0.8.0 (Monetization):**
+- ✅ PRO: Email alerts (immediate high-threat, daily digest)
+- ✅ PRO: Desktop notifications (Windows toast)
+- ✅ Dashboard: Threat count badge
+
+**Future (v1.0+):**
+- ⏳ Mobile push notifications (if companion app)
+- ⏳ Webhook integration (IT admins)
+
+### False Positive Handling
+
+**Common false positives:**
+- Gateway MAC change (user disconnects/reconnects) → Shows in log as "expected"
+- DNS resolver timeout → Logged as "transient" (not threat)
+- Legitimate alternate DNS → Configurable in settings (user can whitelist)
+
+**UI affordance:**
+```
+Activity log entry:
+"Gateway MAC changed: 00:1A:2B:3C:4D:5E → AA:BB:CC:DD:EE:FF"
+[This is normal?]  ← User can dismiss false positives
+```
+
+---
+
 ## UI Components
 
 ### 1. Main Window (Dashboard)
