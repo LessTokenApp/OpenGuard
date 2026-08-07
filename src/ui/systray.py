@@ -162,10 +162,9 @@ class SystemTray(QSystemTrayIcon):
     def _on_settings_clicked(self) -> None:
         """Handle settings action.
 
-        Emits the settings_clicked signal (reserved for future implementation).
+        Emits the settings_clicked signal.
         """
-        # Future implementation: open settings dialog
-        pass
+        self.settings_clicked.emit()
 
     def _on_analytics_clicked(self) -> None:
         """Handle analytics action.

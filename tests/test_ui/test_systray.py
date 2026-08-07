@@ -142,3 +142,45 @@ class TestSystemTraySignals:
         assert any("Settings" in text for text in actions)
         assert any("Help" in text for text in actions)
         assert any("Exit" in text for text in actions)
+
+    def test_settings_action_emits_signal(self, qapp, qtbot):
+        """Test that settings menu action emits settings_clicked signal.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        systray = SystemTray()
+
+        # Connect to the signal to capture emissions
+        with qtbot.waitSignal(systray.settings_clicked, timeout=1000):
+            # Trigger the settings action
+            systray.settings_action.trigger()
+
+    def test_toggle_action_emits_signal(self, qapp, qtbot):
+        """Test that toggle menu action emits toggle_clicked signal.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        systray = SystemTray()
+
+        # Connect to the signal to capture emissions
+        with qtbot.waitSignal(systray.toggle_clicked, timeout=1000):
+            # Trigger the toggle action
+            systray.toggle_action.trigger()
+
+    def test_exit_action_emits_signal(self, qapp, qtbot):
+        """Test that exit menu action emits exit_clicked signal.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        systray = SystemTray()
+
+        # Connect to the signal to capture emissions
+        with qtbot.waitSignal(systray.exit_clicked, timeout=1000):
+            # Trigger the exit action
+            systray.exit_action.trigger()
