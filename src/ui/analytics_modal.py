@@ -1,6 +1,10 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
-from datetime import datetime, timedelta
+"""Analytics Modal for displaying event statistics and PRO features."""
+
+from datetime import datetime
 from typing import List
+
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
+
 from src.models.event import Event
 
 
@@ -41,15 +45,14 @@ class AnalyticsModal(QDialog):
         self.setLayout(layout)
         self.events: List[Event] = []
 
-    def set_events(self, events: List[Event]):
+    def set_events(self, events: List[Event]) -> None:
         """Update analytics from events list"""
         self.events = events
         self._update_display()
 
-    def _update_display(self):
+    def _update_display(self) -> None:
         """Refresh display based on events"""
         total = len(self.events)
-        success_count = sum(1 for e in self.events if e.severity == "SUCCESS")
         threat_count = sum(1 for e in self.events if e.severity in ["WARN", "ERROR"])
 
         # Calculate 24h risk
@@ -69,6 +72,6 @@ class AnalyticsModal(QDialog):
                      f"Last 24h Risk: {risk_status}"
 
         if self.is_pro:
-            stats_text += f"\n📈 7-Day Trends: Available [Graph]"
+            stats_text += "\n📈 7-Day Trends: Available [Graph]"
 
         self.stats_label.setText(stats_text)
