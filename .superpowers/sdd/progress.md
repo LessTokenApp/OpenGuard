@@ -22,7 +22,7 @@
 
 ### Week 4: Backend Integration
 - [x] Task 9: HardeningManager (PowerShell IPC) ✅ (commit f555d68, review clean)
-- [ ] Task 10: AnalyticsEngine (JSONL → SQLite)
+- [x] Task 10: AnalyticsEngine (JSONL → SQLite) ✅ (commit 98e2e67, 30 tests passing)
 - [ ] Task 11: ConfigManager (YAML I/O)
 - [ ] Task 12: ProcessMonitor (Watch PowerShell)
 
