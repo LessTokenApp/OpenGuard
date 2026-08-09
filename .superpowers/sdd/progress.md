@@ -15,13 +15,13 @@
 - [x] Task 4: System Tray Integration ✅ (commits acacd15..c1ce000, review clean)
 
 ### Week 2-3: UI Components
-- [ ] Task 5: Settings Dialog (Tabs)
-- [ ] Task 6: Onboarding Wizard (4-Screen Flow)
-- [ ] Task 7: Analytics Modal
-- [ ] Task 8: UI Styles & Dark Mode
+- [x] Task 5: Settings Dialog (Tabs) ✅ (commits 871c1e2..47ab86c, review clean)
+- [x] Task 6: Onboarding Wizard (4-Screen Flow) ✅ (commits f4c5edc..ee5f8d3, review clean)
+- [x] Task 7: Analytics Modal ✅ (commits 76e69d7..7fa4f8f, review clean)
+- [x] Task 8: UI Styles & Dark Mode ✅ (commit 6ae49c6, review clean)
 
 ### Week 4: Backend Integration
-- [ ] Task 9: HardeningManager (PowerShell IPC)
+- [x] Task 9: HardeningManager (PowerShell IPC) ✅ (commit f555d68, review clean)
 - [ ] Task 10: AnalyticsEngine (JSONL → SQLite)
 - [ ] Task 11: ConfigManager (YAML I/O)
 - [ ] Task 12: ProcessMonitor (Watch PowerShell)
@@ -44,4 +44,4 @@
 
 ## Known Issues / Minor Findings
 
-(None yet)
+- Task 5: unused `import pytest` in tests/test_ui/test_settings_dialog.py after app fixture removal (trivial, non-blocking; flag for final whole-branch review cleanup pass)
