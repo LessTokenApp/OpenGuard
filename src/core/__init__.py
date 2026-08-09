@@ -4,6 +4,7 @@ This package contains backend logic for communicating with PowerShell scripts,
 data processing, and system operations.
 """
 
+from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
 
-__all__ = ["HardeningManager"]
+__all__ = ["ConfigManager", "HardeningManager"]
