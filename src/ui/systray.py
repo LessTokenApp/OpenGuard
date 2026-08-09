@@ -6,6 +6,8 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
 
+from src.ui.styles import get_stylesheet
+
 
 class SystemTray(QSystemTrayIcon):
     """System tray icon with context menu for OpenGuard.
@@ -63,6 +65,9 @@ class SystemTray(QSystemTrayIcon):
 
     def _setup_menu(self) -> None:
         """Set up the context menu with all required actions."""
+        # Apply stylesheet to the menu (QMenu is a QWidget, QSystemTrayIcon is not)
+        self.tray_menu.setStyleSheet(get_stylesheet(dark_mode=True))
+
         # Status indicator (read-only)
         self.status_action = self.tray_menu.addAction("🟢 Protected")
         self.status_action.setEnabled(False)

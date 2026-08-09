@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.models.settings import Settings
+from src.ui.styles import get_stylesheet
 
 
 class SettingsDialog(QDialog):
@@ -43,6 +44,7 @@ class SettingsDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Settings")
         self.setGeometry(200, 200, 500, 400)
+        self.setStyleSheet(get_stylesheet(dark_mode=True))
 
         if initial_settings is None:
             self.settings = Settings()

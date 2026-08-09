@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSignal
 
 from src.models.settings import Settings
+from src.ui.styles import get_stylesheet
 
 
 class OnboardingWizard(QWizard):
@@ -36,6 +37,7 @@ class OnboardingWizard(QWizard):
         super().__init__()
         self.setWindowTitle("OpenGuard Setup")
         self.setGeometry(300, 300, 500, 400)
+        self.setStyleSheet(get_stylesheet(dark_mode=True))
 
         # Add pages
         self.page1 = self.create_welcome_page()

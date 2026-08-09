@@ -6,6 +6,7 @@ from typing import List
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
 
 from src.models.event import Event
+from src.ui.styles import get_stylesheet
 
 
 class AnalyticsModal(QDialog):
@@ -15,6 +16,7 @@ class AnalyticsModal(QDialog):
         super().__init__()
         self.setWindowTitle("Analytics Dashboard")
         self.setGeometry(200, 200, 600, 500)
+        self.setStyleSheet(get_stylesheet(dark_mode=True))
         self.is_pro = is_pro
 
         layout = QVBoxLayout()

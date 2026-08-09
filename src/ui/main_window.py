@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.models.event import Event
+from src.ui.styles import get_stylesheet
 
 
 class MainWindow(QMainWindow):
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("OpenGuard")
         self.setGeometry(100, 100, 800, 600)
+        self.setStyleSheet(get_stylesheet(dark_mode=True))
 
         # Create central widget
         central_widget = QWidget()
