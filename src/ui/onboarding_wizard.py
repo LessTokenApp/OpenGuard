@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QRadioButton,
     QButtonGroup,
+    QDialog,
 )
 from PyQt6.QtCore import pyqtSignal
 
@@ -18,11 +19,15 @@ class OnboardingWizard(QWizard):
 
     Guides users through initial configuration including protection level
     selection. Emits completed signal with final settings.
+
+    Signals:
+        completed: Emitted when wizard completes (accept only, not cancel)
+            with the configured Settings object.
     """
 
     completed = pyqtSignal(Settings)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the onboarding wizard.
 
         Sets up 4-page wizard with welcome, protection info, firewall
@@ -31,9 +36,6 @@ class OnboardingWizard(QWizard):
         super().__init__()
         self.setWindowTitle("OpenGuard Setup")
         self.setGeometry(300, 300, 500, 400)
-
-        # Settings to be collected
-        self.selected_firewall_level = "Moderate"
 
         # Add pages
         self.page1 = self.create_welcome_page()
@@ -157,20 +159,26 @@ class OnboardingWizard(QWizard):
         button_group = self.page3.button_group
         checked_id = button_group.checkedId()
 
-        if checked_id == 0:
-            firewall = "Basic"
-        elif checked_id == 1:
-            firewall = "Moderate"
-        else:
-            firewall = "Relaxed"
+        # Map button group IDs to firewall levels
+        firewall_level_map = {
+            0: "Basic",
+            1: "Moderate",
+            2: "Relaxed",
+        }
+        firewall = firewall_level_map.get(checked_id, "Moderate")
 
         return Settings(firewall_level=firewall)
 
-    def on_finished(self):
+    def on_finished(self, result: int) -> None:
         """Handle wizard completion and emit completed signal.
 
-        Called when wizard finishes, emits the completed signal with
-        the final Settings object.
+        Called when wizard finishes (accept or reject). Only emits the
+        completed signal if the wizard was accepted (not cancelled).
+
+        Args:
+            result: Dialog result code from QWizard.finished signal
+                   (QDialog.DialogCode.Accepted = 1, .Rejected = 0)
         """
-        settings = self.get_settings()
-        self.completed.emit(settings)
+        if result == QDialog.DialogCode.Accepted:
+            settings = self.get_settings()
+            self.completed.emit(settings)

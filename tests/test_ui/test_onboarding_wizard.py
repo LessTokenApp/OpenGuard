@@ -122,7 +122,7 @@ class TestOnboardingWizardSignals:
         assert hasattr(wizard, "completed")
 
     def test_wizard_completed_signal_emits_settings(self, qapp, qtbot):
-        """Test that completed signal emits Settings object.
+        """Test that completed signal emits Settings object on accept.
 
         Args:
             qapp: pytest-qt fixture for QApplication
@@ -132,3 +132,15 @@ class TestOnboardingWizardSignals:
 
         with qtbot.waitSignal(wizard.completed, timeout=1000):
             wizard.finished.emit(1)  # Emit finished signal (1 = Accepted)
+
+    def test_wizard_completed_signal_not_emitted_on_cancel(self, qapp, qtbot):
+        """Test that completed signal is NOT emitted when wizard is cancelled.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        wizard = OnboardingWizard()
+
+        with qtbot.assertNotEmitted(wizard.completed, wait=500):
+            wizard.finished.emit(0)  # Emit finished signal (0 = Rejected/Cancel)
