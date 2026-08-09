@@ -2,17 +2,17 @@
 
 **Plan:** docs/superpowers/plans/2026-08-04-openguard-v0.7-implementation.md  
 **Start:** 2026-08-04  
-**Status:** IN PROGRESS (Week 1 / Task 1)
+**Status:** IN PROGRESS (Week 2-3 / Task 5)
 
 ---
 
 ## Task Status
 
 ### Week 1: Foundation
-- [ ] Task 1: Project Setup & Dependencies → IN PROGRESS
-- [ ] Task 2: Base Application Class
-- [ ] Task 3: Main Window — Status Card & Activity Log
-- [ ] Task 4: System Tray Integration
+- [x] Task 1: Project Setup & Dependencies ✅ (commits d61541b..322de98)
+- [x] Task 2: Base Application Class ✅ (commit 3cb1989)
+- [x] Task 3: Main Window — Status Card & Activity Log ✅ (commit 45d57d9)
+- [x] Task 4: System Tray Integration ✅ (commits acacd15..c1ce000, review clean)
 
 ### Week 2-3: UI Components
 - [ ] Task 5: Settings Dialog (Tabs)

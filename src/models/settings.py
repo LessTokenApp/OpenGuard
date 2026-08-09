@@ -1,7 +1,6 @@
 """Settings dataclass for user configuration."""
 
-from dataclasses import asdict, dataclass
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass

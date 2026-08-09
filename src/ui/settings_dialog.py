@@ -1,5 +1,7 @@
 """Settings dialog with tabbed interface for configuration."""
 
+from typing import Optional
+
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -31,7 +33,7 @@ class SettingsDialog(QDialog):
 
     settings_changed = pyqtSignal()
 
-    def __init__(self, initial_settings: Settings = None) -> None:
+    def __init__(self, initial_settings: Optional[Settings] = None) -> None:
         """Initialize the settings dialog.
 
         Args:
@@ -74,11 +76,19 @@ class SettingsDialog(QDialog):
         button_layout.addWidget(self.cancel_button)
 
         self.save_button = QPushButton("Save")
-        self.save_button.clicked.connect(self.accept)
+        self.save_button.clicked.connect(self._on_save_clicked)
         button_layout.addWidget(self.save_button)
 
         layout.addLayout(button_layout)
         self.setLayout(layout)
+
+    def _on_save_clicked(self) -> None:
+        """Handle save button click.
+
+        Emits settings_changed signal and closes the dialog.
+        """
+        self.settings_changed.emit()
+        self.accept()
 
     def _create_protection_tab(self) -> QWidget:
         """Create protection settings tab.

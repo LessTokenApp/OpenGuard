@@ -1,25 +1,10 @@
 """Tests for settings dialog UI component."""
 
 import pytest
-from PyQt6.QtWidgets import QApplication, QDialog
+from PyQt6.QtWidgets import QDialog
 
 from src.models.settings import Settings
 from src.ui.settings_dialog import SettingsDialog
-
-
-@pytest.fixture
-def app():
-    """Create QApplication instance for testing.
-
-    Args:
-        None
-
-    Yields:
-        QApplication: The application instance
-    """
-    if QApplication.instance():
-        return QApplication.instance()
-    return QApplication([])
 
 
 class TestSettingsDialogCreation:
@@ -145,9 +130,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
-        # DNS provider should persist from what's set in the dialog
+        dialog.dns_combo.setCurrentText("Google")
         settings = dialog.get_settings()
-        assert settings.dns_provider is not None
+        assert settings.dns_provider == "Google"
 
     def test_settings_persistence_auto_start(self, qapp):
         """Test that auto_start setting can be updated and retrieved.
@@ -156,9 +141,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.auto_start_check.setChecked(False)
         settings = dialog.get_settings()
-        # Should have auto_start attribute
-        assert hasattr(settings, "auto_start")
+        assert settings.auto_start is False
 
     def test_settings_persistence_dns_enabled(self, qapp):
         """Test that DNS enabled setting can be retrieved.
@@ -167,8 +152,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.dns_enabled_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.dns_enabled, bool)
+        assert settings.dns_enabled is False
 
     def test_settings_persistence_network_monitoring(self, qapp):
         """Test that network monitoring setting can be retrieved.
@@ -177,8 +163,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.network_monitoring_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.network_monitoring, bool)
+        assert settings.network_monitoring is False
 
     def test_settings_persistence_dark_mode(self, qapp):
         """Test that dark mode setting can be retrieved.
@@ -187,8 +174,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.dark_mode_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.dark_mode, bool)
+        assert settings.dark_mode is False
 
     def test_settings_persistence_systray_enabled(self, qapp):
         """Test that systray enabled setting can be retrieved.
@@ -197,8 +185,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.systray_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.systray_enabled, bool)
+        assert settings.systray_enabled is False
 
     def test_settings_persistence_analytics_enabled(self, qapp):
         """Test that analytics enabled setting can be retrieved.
@@ -207,8 +196,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.analytics_enabled_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.analytics_enabled, bool)
+        assert settings.analytics_enabled is False
 
     def test_settings_persistence_retention_days(self, qapp):
         """Test that retention days setting can be retrieved.
@@ -217,9 +207,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.retention_spin.setValue(30)
         settings = dialog.get_settings()
-        assert isinstance(settings.retention_days, int)
-        assert settings.retention_days >= 7
+        assert settings.retention_days == 30
 
     def test_settings_persistence_show_daily_tips(self, qapp):
         """Test that show daily tips setting can be retrieved.
@@ -228,8 +218,9 @@ class TestSettingsPersistence:
             qapp: pytest-qt fixture for QApplication
         """
         dialog = SettingsDialog()
+        dialog.tips_check.setChecked(False)
         settings = dialog.get_settings()
-        assert isinstance(settings.show_daily_tips, bool)
+        assert settings.show_daily_tips is False
 
 
 class TestInitialSettings:
@@ -258,3 +249,19 @@ class TestInitialSettings:
         assert settings.firewall_level == "Relaxed"
         assert settings.dns_provider == "Google"
         assert settings.retention_days == 30
+
+
+class TestSettingsDialogSignals:
+    """Test signal emissions from settings dialog."""
+
+    def test_save_button_emits_settings_changed_signal(self, qapp, qtbot):
+        """Test that save button emits settings_changed signal.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        dialog = SettingsDialog()
+
+        with qtbot.waitSignal(dialog.settings_changed, timeout=1000):
+            dialog.save_button.click()
