@@ -7,14 +7,21 @@ VPN'siz halka açık ağ sertleştirmesi - Windows 11+ için.
 1. \OpenGuard-Baslat.bat\'ı çift tıkla (admin yetkisi gerekli)
 2. Menüden seçim yap
 
-## Özellikler (v0.6.0)
+## Özellikler (v0.7.0)
 
 - ✅ Hardening aç/kapat
 - ✅ Adaptive Firewall (3 seviye: Basic/Moderate/Relaxed)
 - ✅ DNS Güvenliği kontrol (DoH tespiti)
 - ✅ Ağ izleme
-- ✅ Analytics Dashboard (threat timeline)
+- ✅ Analytics Dashboard (threat timeline, FREE/PRO tiers)
 - ✅ Settings yönetimi
+- ✅ Process Monitoring (TDD approach)
+- ✅ YAML Config Manager
+- ✅ HardeningManager PowerShell IPC
+- ✅ AnalyticsEngine (JSONL→SQLite, risk scoring)
+- ✅ Qt Stylesheet System (dark mode support)
+- ✅ Onboarding Wizard (4 screens)
+- ✅ Risk Timeline Analytics (threat analysis)
 
 ## Menü Seçenekleri
 
@@ -51,4 +58,5 @@ MIT License - Bkz. LICENSE
 
 ---
 
+**v0.7.0** - Onboarding wizard, dark mode, process monitoring, enhanced analytics
 **v0.6.0** - Analytics Dashboard entegrasyon tamamlandı
