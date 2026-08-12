@@ -17,7 +17,7 @@ This document provides comprehensive instructions for building the OpenGuard app
 Clone the repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/NuraydinArikan/OpenGuard.git
+git clone https://github.com/LessTokenApp/OpenGuard.git
 cd OpenGuard
 ```
 
@@ -266,6 +266,6 @@ PyInstaller --name=OpenGuard --onedir --windowed --icon=installer/openguard.ico 
 
 For issues or questions about building OpenGuard:
 
-- **GitHub Issues**: https://github.com/NuraydinArikan/OpenGuard/issues
+- **GitHub Issues**: https://github.com/LessTokenApp/OpenGuard/issues
 - **Email**: info@lesstoken.app
 - **Documentation**: https://docs.openguard.app

@@ -46,10 +46,10 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/openguard/openguard"
+Homepage = "https://github.com/LessTokenApp/OpenGuard"
 Documentation = "https://docs.openguard.app"
-Repository = "https://github.com/openguard/openguard.git"
-"Issue Tracker" = "https://github.com/openguard/openguard/issues"
+Repository = "https://github.com/LessTokenApp/OpenGuard.git"
+"Issue Tracker" = "https://github.com/LessTokenApp/OpenGuard/issues"
 
 [tool.setuptools]
 packages = ["openguard"]
