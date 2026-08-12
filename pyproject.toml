@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}
 authors = [
-    {name = "OpenGuard Team", email = "info@openguard.app"}
+    {name = "Nuraydin Arikan", email = "info@lesstoken.app"}
 ]
 keywords = ["pyqt6", "gui", "system-monitoring", "windows"]
 classifiers = [
@@ -47,18 +47,15 @@ test = [
 
 [project.urls]
 Homepage = "https://github.com/LessTokenApp/OpenGuard"
-Documentation = "https://docs.openguard.app"
+Documentation = "https://github.com/LessTokenApp/OpenGuard/tree/master/docs"
 Repository = "https://github.com/LessTokenApp/OpenGuard.git"
 "Issue Tracker" = "https://github.com/LessTokenApp/OpenGuard/issues"
 
-[tool.setuptools]
-packages = ["openguard"]
-
-[tool.setuptools.package-dir]
-"" = "src"
-
-[tool.setuptools.package-data]
-openguard = ["py.typed"]
+# The importable package is `src` itself (code and tests both use `from src.*`
+# and the app entry point is `python -m src.main`), so packages are discovered
+# in place with no package-dir remapping.
+[tool.setuptools.packages.find]
+include = ["src*"]
 
 [tool.black]
 line-length = 100
@@ -105,7 +102,7 @@ exclude = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["openguard"]
+known-first-party = ["src"]
 known-third-party = ["PyQt6"]
 
 [tool.mypy]
