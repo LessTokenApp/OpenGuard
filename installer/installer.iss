@@ -7,6 +7,10 @@
 ; - OpenGuard.ps1 in the root directory
 
 [Setup]
+; Every path below is written relative to the repository root, not to this
+; file, so point SourceDir there. Without it Inno resolves them against
+; installer/ and the build fails on the first missing file.
+SourceDir=..
 AppName=OpenGuard
 AppVersion=0.7.0
 ; NOTE: AppPublisher must match the Common Name (CN) on the code signing
@@ -18,7 +22,7 @@ AppSupportURL=https://github.com/LessTokenApp/OpenGuard/issues
 AppUpdatesURL=https://github.com/LessTokenApp/OpenGuard/releases
 AppCopyright=Copyright (C) 2024-2026 Nuraydin Arikan
 AppComments=Professional Python GUI application for Windows system hardening and security analysis
-DefaultDirName={pf}\OpenGuard
+DefaultDirName={autopf}\OpenGuard
 DefaultGroupName=OpenGuard
 AllowNoIcons=yes
 OutputDir=dist\installer
@@ -26,11 +30,12 @@ OutputBaseFilename=OpenGuard-Setup-0.7.0
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
-PrivilegesRequiredOverride=none
 LicenseFile=LICENSE
+; Windows 11 is 10.0 build 22000, matching the documented minimum. Inno
+; refuses the install with its own message, so no scripted check is needed.
+MinVersion=10.0.22000
 ChangesAssociations=no
 WizardStyle=modern
-WizardResizable=yes
 UninstallDisplayIcon={app}\OpenGuard.exe
 SetupIconFile=installer\openguard.ico
 
@@ -39,7 +44,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1,10.0
 
 [Files]
 ; Main PyInstaller executable and dependencies
@@ -64,11 +68,10 @@ Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Name: "{group}\OpenGuard"; Filename: "{app}\OpenGuard.exe"; IconIndex: 0; Comment: "OpenGuard Security Application"
 Name: "{group}\{cm:UninstallProgram,OpenGuard}"; Filename: "{uninstallexe}"
 
-; Desktop icon (optional, controlled by task)
-Name: "{userdesktop}\OpenGuard"; Filename: "{app}\OpenGuard.exe"; IconIndex: 0; Comment: "OpenGuard Security Application"; Tasks: desktopicon
-
-; Quick Launch icon (optional, only for older Windows versions)
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenGuard"; Filename: "{app}\OpenGuard.exe"; Comment: "OpenGuard Security Application"; Tasks: quicklaunchicon
+; Desktop icon (optional, controlled by task). Uses the "auto" constant so an
+; admin-mode install writes to the common desktop rather than the elevating
+; account's own, which would hide the icon from the actual user.
+Name: "{autodesktop}\OpenGuard"; Filename: "{app}\OpenGuard.exe"; IconIndex: 0; Comment: "OpenGuard Security Application"; Tasks: desktopicon
 
 [Run]
 ; Launch the application after installation
@@ -78,7 +81,7 @@ Filename: "{app}\OpenGuard.exe"; Description: "{cm:LaunchProgram,OpenGuard}"; Fl
 ; Clean up user data on uninstall (optional - can be commented out to preserve user settings)
 ; Type: filesandordirs; Name: "{localappdata}\OpenGuard"
 Type: files; Name: "{app}\scripts\*"
-Type: dirsandfiles; Name: "{app}"
+Type: filesandordirs; Name: "{app}"
 
 [InstallDelete]
 ; Remove old installations before installing new version
@@ -93,19 +96,11 @@ begin
   { For example: version checks, dependency validation, etc. }
 end;
 
-function InitializeSetup: Boolean;
+// Referenced by the [INI] section via a code: prefix to stamp the install
+// date. Inno requires the String parameter even when it goes unused.
+function GetCurrentDateTimeString(Param: String): String;
 begin
-  Result := True;
-
-  { Check if running on Windows (should always be true for this installer) }
-  if not IsWin32 and not IsWin64 then
-  begin
-    MsgBox('This application requires Windows XP or later.', mbInformation, MB_OK);
-    Result := False;
-  end;
-
-  { Optional: Check for Python runtime or other dependencies }
-  { This can be added if runtime dependencies need to be verified }
+  Result := GetDateTimeString('yyyy-mm-dd hh:nn:ss', '-', ':');
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
