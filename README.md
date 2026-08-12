@@ -59,7 +59,7 @@ Professional Python GUI application for Windows 11+ system hardening and network
 
 ```bash
 # Clone repository
-git clone https://github.com/openguard/openguard.git
+git clone https://github.com/LessTokenApp/OpenGuard.git
 cd OpenGuard
 
 # Create virtual environment
@@ -164,7 +164,7 @@ For detailed architecture information, see [docs/ARCHITECTURE.md](docs/ARCHITECT
 
 ```bash
 # Clone and setup
-git clone https://github.com/openguard/openguard.git
+git clone https://github.com/LessTokenApp/OpenGuard.git
 cd OpenGuard
 python -m venv venv
 .\venv\Scripts\Activate.ps1
@@ -232,10 +232,10 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 | Channel | Link |
 |---------|------|
-| **GitHub** | [github.com/NuraydinArikan/OpenGuard](https://github.com/NuraydinArikan/OpenGuard) |
+| **GitHub** | [github.com/LessTokenApp/OpenGuard](https://github.com/LessTokenApp/OpenGuard) |
 | **Email** | info@lesstoken.app |
-| **Issues** | [GitHub Issues](https://github.com/NuraydinArikan/OpenGuard/issues) |
-| **Discussions** | [GitHub Discussions](https://github.com/NuraydinArikan/OpenGuard/discussions) |
+| **Issues** | [GitHub Issues](https://github.com/LessTokenApp/OpenGuard/issues) |
+| **Discussions** | [GitHub Discussions](https://github.com/LessTokenApp/OpenGuard/discussions) |
 
 ---
 

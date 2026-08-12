@@ -16,7 +16,7 @@ Thank you for your interest in contributing to OpenGuard! This guide will help y
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/openguard/openguard.git
+git clone https://github.com/LessTokenApp/OpenGuard.git
 cd OpenGuard
 ```
 
@@ -342,7 +342,7 @@ git push origin feature/my-feature
 
 #### 6. Create Pull Request
 
-1. Go to GitHub: `github.com/openguard/openguard`
+1. Go to GitHub: `github.com/LessTokenApp/OpenGuard`
 2. Click "New Pull Request"
 3. Select your branch
 4. Fill in PR description:
@@ -529,8 +529,8 @@ def enable_hardening(self, level: str = "Moderate") -> bool:
 
 ## Getting Help
 
-- **Issues:** Check [GitHub Issues](https://github.com/openguard/openguard/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/openguard/openguard/discussions)
+- **Issues:** Check [GitHub Issues](https://github.com/LessTokenApp/OpenGuard/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/LessTokenApp/OpenGuard/discussions)
 - **Email:** info@openguard.app
 
 ---
