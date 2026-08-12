@@ -22,8 +22,8 @@ Professional Python GUI application for Windows 11+ system hardening and network
 - ✅ **System Tray Integration** - Easy access from desktop
 
 ### Analytics & Monitoring
-- ✅ **Analytics Dashboard** - Threat timeline visualization
-- ✅ **Risk Scoring** - Automated threat assessment
+- ✅ **Analytics Dashboard** - Event totals, threats blocked, 24h risk level
+- ✅ **Risk Scoring** - Automated LOW/MEDIUM/HIGH assessment over a 24h window
 - ✅ **Event Logging** - JSONL format with SQLite storage
 - ✅ **Free/Pro Tiers** - Feature-gated analytics dashboard
 
@@ -91,20 +91,20 @@ python -m src.main
 ## Screenshots
 
 ### Main Window
-![Main Window Screenshot Placeholder](docs/images/main-window-placeholder.png)
-*Status card with protection toggle, activity log*
+![OpenGuard main window](docs/images/main-window.png)
+*Protection toggle and activity log*
 
-### Analytics Dashboard
-![Analytics Dashboard Placeholder](docs/images/analytics-dashboard-placeholder.png)
-*Threat timeline, risk scoring, event analytics*
+### Analytics
+![OpenGuard analytics dialog](docs/images/analytics.png)
+*Event totals, threats blocked, and 24-hour risk level. Charting is not implemented yet.*
 
-### Settings Dialog
-![Settings Dialog Placeholder](docs/images/settings-placeholder.png)
-*Firewall levels, DNS settings, preferences*
+### Settings
+![OpenGuard settings dialog](docs/images/settings.png)
+*Firewall level, DNS provider, and monitoring preferences*
 
 ### Onboarding Wizard
-![Onboarding Wizard Placeholder](docs/images/onboarding-placeholder.png)
-*4-screen setup flow for new users*
+![OpenGuard onboarding wizard](docs/images/onboarding.png)
+*Four-screen first-run setup*
 
 ---
 
