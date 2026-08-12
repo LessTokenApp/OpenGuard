@@ -37,6 +37,19 @@ def get_stylesheet(dark_mode: bool = True) -> str:
             color: {text};
         }}
 
+        /* QWizard paints its own page background. Without these rules the
+           themed label color sits on the untouched native background, which
+           in dark mode leaves light text on a light surface. */
+        QWizard, QWizardPage {{
+            background-color: {bg};
+            color: {text};
+        }}
+
+        QRadioButton, QCheckBox {{
+            color: {text};
+            spacing: 6px;
+        }}
+
         QPushButton {{
             background-color: #3B82F6;
             color: white;
