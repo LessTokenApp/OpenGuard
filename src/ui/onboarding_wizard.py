@@ -37,6 +37,10 @@ class OnboardingWizard(QWizard):
         super().__init__()
         self.setWindowTitle("OpenGuard Setup")
         self.setGeometry(300, 300, 500, 400)
+        # Aero is the Windows default and draws a native light header and page
+        # background that stylesheets cannot reach, so the dark theme's text
+        # color ends up unreadable. ModernStyle honours the stylesheet.
+        self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
         self.setStyleSheet(get_stylesheet(dark_mode=True))
 
         # Add pages
