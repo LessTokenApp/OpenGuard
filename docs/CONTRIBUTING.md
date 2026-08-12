@@ -212,6 +212,57 @@ pytest
 
 ---
 
+## Contributor Certificate of Origin (DCO)
+
+OpenGuard requires every commit to be signed off under the
+[Developer Certificate of Origin 1.1](https://developercertificate.org/).
+Pull requests without a sign-off on every commit cannot be merged.
+
+### What you are certifying
+
+By adding a `Signed-off-by` line, you certify that:
+
+1. You wrote the contribution yourself, or you have the right to submit it under
+   the project's license; and
+2. You understand the contribution is public and will be redistributed under the
+   project's license, including in future versions of OpenGuard that may be
+   distributed under different terms.
+
+### How to sign off
+
+Add the `-s` flag to every commit:
+
+```bash
+git commit -s -m "feat: add feature description"
+```
+
+This appends a line to your commit message:
+
+```
+Signed-off-by: Your Name <your.email@example.com>
+```
+
+The name and email must be real and must match your `git config user.name` and
+`git config user.email`.
+
+### Fixing a missing sign-off
+
+If you forgot the flag, amend the last commit:
+
+```bash
+git commit --amend -s --no-edit
+git push --force-with-lease origin feature/my-feature
+```
+
+For multiple commits on your branch:
+
+```bash
+git rebase --signoff origin/master
+git push --force-with-lease origin feature/my-feature
+```
+
+---
+
 ## Development Workflow
 
 ### Branch Naming
@@ -252,9 +303,12 @@ git checkout -b feature/my-feature
 # Stage files
 git add src/my_module.py tests/test_my_module.py
 
-# Commit with descriptive message
-git commit -m "feat: add feature description"
+# Commit with descriptive message (-s adds the required DCO sign-off)
+git commit -s -m "feat: add feature description"
 ```
+
+**The `-s` flag is required on every commit.** See
+[Contributor Certificate of Origin (DCO)](#contributor-certificate-of-origin-dco).
 
 **Commit Message Format:**
 - `feat:` New feature
@@ -305,7 +359,7 @@ git push origin feature/my-feature
 
 # Commit changes
 git add .
-git commit -m "fix: address review feedback"
+git commit -s -m "fix: address review feedback"
 
 # Push to update PR
 git push origin feature/my-feature
