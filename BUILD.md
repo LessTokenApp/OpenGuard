@@ -8,7 +8,7 @@ This document provides comprehensive instructions for building the OpenGuard app
 - **PowerShell 5.1 or later**
 - **Python 3.12 or later**
 - **pip** (Python package manager)
-- **Inno Setup 6.0 or later** (for creating the installer)
+- **Inno Setup 7.0 or later** (for creating the installer)
 
 ## Build Process
 
@@ -28,37 +28,21 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-pip install PyInstaller
-```
-
-If `requirements.txt` doesn't exist, install the project in development mode:
+Install the project and the build tool:
 
 ```bash
 pip install -e ".[dev]"
-pip install PyInstaller
+pip install pyinstaller
 ```
 
 ### 2. Build Executable with PyInstaller
 
 Run the following PyInstaller command to create a standalone executable:
 
+Run from the repository root, substituting the absolute path to your checkout:
+
 ```bash
-PyInstaller --name=OpenGuard ^
-  --onedir ^
-  --windowed ^
-  --icon=installer/openguard.ico ^
-  --add-data="src:src" ^
-  --hidden-import=PyQt6.QtCore ^
-  --hidden-import=PyQt6.QtGui ^
-  --hidden-import=PyQt6.QtWidgets ^
-  --distpath=dist ^
-  --buildpath=build ^
-  --specpath=build ^
-  src/main.py
+python -m PyInstaller --noconfirm --name=OpenGuard --onedir --windowed --icon="C:/path/to/OpenGuard/installer/openguard.ico" --paths="C:/path/to/OpenGuard" --hidden-import=PyQt6.QtCore --hidden-import=PyQt6.QtGui --hidden-import=PyQt6.QtWidgets --distpath=dist --workpath=build --specpath=build src/main.py
 ```
 
 #### PyInstaller Command Breakdown
@@ -66,11 +50,14 @@ PyInstaller --name=OpenGuard ^
 - `--name=OpenGuard`: Name of the generated executable
 - `--onedir`: Create a directory with executable and dependencies (recommended)
 - `--windowed`: No console window (GUI application)
-- `--icon`: Application icon file path
-- `--add-data`: Include data files (application resources)
+- `--icon`: Application icon. Must be **absolute**: `--specpath` moves the
+  reference point for relative paths into `build/`, where the icon is not.
+- `--paths`: Repository root. `src/main.py` imports `from src.app import ...`,
+  and PyInstaller only puts the entry script's own directory on the path, so
+  without this the `src` package cannot be resolved. Also absolute.
 - `--hidden-import`: Explicitly include PyQt6 modules that may be missed by analysis
 - `--distpath=dist`: Output directory for the executable
-- `--buildpath=build`: Temporary build directory
+- `--workpath=build`: Temporary build directory
 - `--specpath=build`: Location for the .spec file
 - `src/main.py`: Entry point file
 
@@ -92,15 +79,17 @@ Expected behavior:
 
 #### 4.1 Install Inno Setup
 
-Download and install **Inno Setup 6.0** or later from:
+Download and install **Inno Setup 7.0** or later from:
 https://jrsoftware.org/isdl.php
 
-#### 4.2 Prepare Icon File (Optional)
+Note that Inno Setup 7 is free for non-commercial use only. Selling OpenGuard,
+or shipping a paid tier built with it, requires a commercial licence.
 
-Create or place an application icon at:
-`installer/openguard.ico`
+#### 4.2 Icon File
 
-If no icon is available, remove or comment out the `SetupIconFile` line in `installer/installer.iss`.
+`installer/openguard.ico` is committed to the repository, so no preparation is
+needed. It is a generated placeholder and should be replaced with real branding
+before a public release.
 
 #### 4.3 Compile the Installer
 
@@ -115,8 +104,11 @@ If no icon is available, remove or comment out the `SetupIconFile` line in `inst
 **Using Command Line:**
 
 ```bash
-"C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer/installer.iss
+"C:\Program Files\Inno Setup 7\ISCC.exe" installer/installer.iss
 ```
+
+The script sets `SourceDir=..`, so it must be compiled with paths resolving
+from the repository root; the command above does that from either location.
 
 ### 5. Output Artifacts
 
