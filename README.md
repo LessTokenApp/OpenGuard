@@ -38,6 +38,20 @@ Professional Python GUI application for Windows 11+ system hardening and network
 
 ## Installation
 
+> **Windows will warn you when you run the installer.**
+>
+> OpenGuard is not yet signed with a code signing certificate, so SmartScreen
+> reports it as an unrecognised app. The warning is accurate: Windows has no
+> proof of who published the file. It does **not** mean anything was detected
+> in it.
+>
+> Rather than asking you to click through a security warning, every release
+> publishes a SHA-256 hash you can check yourself, and the full source is here
+> to build from. **[How to verify your download →](docs/VERIFYING.md)**
+>
+> That page also explains why antivirus software sometimes flags OpenGuard, and
+> why the app needs Administrator privileges.
+
 ### Option 1: Batch File (Recommended for Users)
 
 ```batch
