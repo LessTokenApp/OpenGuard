@@ -9,11 +9,14 @@
 [Setup]
 AppName=OpenGuard
 AppVersion=0.7.0
-AppPublisher=OpenGuard Team
+; NOTE: AppPublisher must match the Common Name (CN) on the code signing
+; certificate exactly. Verify the exact string the CA issues before signing;
+; changing it later resets SmartScreen reputation.
+AppPublisher=Nuraydin Arikan
 AppPublisherURL=https://github.com/NuraydinArikan/OpenGuard
 AppSupportURL=https://github.com/NuraydinArikan/OpenGuard/issues
 AppUpdatesURL=https://github.com/NuraydinArikan/OpenGuard/releases
-AppCopyright=Copyright (C) 2024 OpenGuard Team
+AppCopyright=Copyright (C) 2024-2026 Nuraydin Arikan
 AppComments=Professional Python GUI application for Windows system hardening and security analysis
 DefaultDirName={pf}\OpenGuard
 DefaultGroupName=OpenGuard

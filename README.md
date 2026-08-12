@@ -253,7 +253,7 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 Built with ❤️ using PyQt6, Python, and PowerShell.
 
-**Contributors:** OpenGuard Team
+**Maintainer:** Less Token
 
 ---
 
