@@ -1,0 +1,10 @@
+# Renders the "Sponsor" button on the repository page.
+#
+# Points at the individual developer account rather than LessTokenApp:
+# GitHub requires a sponsored *organization* to be a registered legal
+# entity in a supported region, which the Less Token brand is not yet.
+# The sponsored *developer* route has no such requirement.
+#
+# The button only appears once GitHub Sponsors enrollment is approved
+# for this account. Until then this file is inert.
+github: NuraydinArikan
