@@ -76,6 +76,11 @@ class OpenGuardApp(QApplication):
         self.hardening_manager.status_changed.connect(self._on_status_changed)
         self.hardening_manager.error_occurred.connect(self._on_error)
 
+        # Both widgets default to showing protection as active. Nothing has run
+        # at this point, so publish the manager's real state before the window
+        # is ever seen rather than claiming safety that was never applied.
+        self._publish_status(self.hardening_manager.get_status())
+
         if self.settings.systray_enabled:
             self.system_tray.show()
 
@@ -89,6 +94,15 @@ class OpenGuardApp(QApplication):
             self.hardening_manager.disable_hardening()
         else:
             self.hardening_manager.enable_hardening(level=self.settings.firewall_level)
+
+    def _publish_status(self, is_protected: bool) -> None:
+        """Push a protection state to every widget that displays it.
+
+        Args:
+            is_protected: Whether protection is currently active.
+        """
+        self.main_window.set_protection_status(is_protected)
+        self.system_tray.set_protection_status(is_protected)
 
     def _on_settings_requested(self) -> None:
         """Open the settings dialog, creating it on first use."""

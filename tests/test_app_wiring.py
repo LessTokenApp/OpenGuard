@@ -57,6 +57,29 @@ class TestApplicationBuildsUI:
         assert isinstance(qapp.hardening_manager, HardeningManager)
 
 
+class TestInitialStateIsHonest:
+    """The interface must not claim protection that was never applied.
+
+    MainWindow and SystemTray both start with is_protected set to True and
+    paint themselves green, while HardeningManager starts False because nothing
+    has run. A freshly launched OpenGuard therefore told the user they were
+    protected when no firewall rule had been applied, and the toggle button
+    read "Disable Protection" while clicking it would enable.
+    """
+
+    def test_window_starts_matching_the_backend(self, qapp):
+        """The window must reflect real state, not an optimistic default."""
+        qapp.setup_ui()
+
+        assert qapp.main_window.is_protected == qapp.hardening_manager.is_protected
+
+    def test_tray_starts_matching_the_backend(self, qapp):
+        """The tray icon colour makes the same claim and must be as honest."""
+        qapp.setup_ui()
+
+        assert qapp.system_tray.is_protected == qapp.hardening_manager.is_protected
+
+
 class TestToggleReachesTheBackend:
     """The toggle button must drive the hardening manager."""
 
