@@ -47,6 +47,7 @@ class OpenGuardApp(QApplication):
         self.settings_dialog: SettingsDialog | None = None
         self.analytics_modal: AnalyticsModal | None = None
         self.onboarding_wizard: OnboardingWizard | None = None
+        self.session_events: list[Event] = []
 
     def setup_ui(self) -> None:
         """Build the user interface and connect it to the backend.
@@ -108,6 +109,7 @@ class OpenGuardApp(QApplication):
         if self.analytics_modal is None:
             self.analytics_modal = AnalyticsModal()
 
+        self.analytics_modal.set_events(self.session_events)
         self.analytics_modal.show()
         self.analytics_modal.raise_()
 
@@ -175,14 +177,15 @@ class OpenGuardApp(QApplication):
             description: Human-readable description of what happened.
             severity: One of "SUCCESS", "WARN" or "ERROR".
         """
-        self.main_window.add_activity_log_entry(
-            Event(
-                timestamp=datetime.now(),
-                event=description,
-                severity=severity,
-                category="system",
-            )
+        event = Event(
+            timestamp=datetime.now(),
+            event=description,
+            severity=severity,
+            category="system",
         )
+
+        self.session_events.append(event)
+        self.main_window.add_activity_log_entry(event)
 
     def run(self) -> int:
         """Show main window and start the event loop.

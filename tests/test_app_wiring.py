@@ -243,6 +243,25 @@ class TestAnalyticsIsReachable:
 
         assert isinstance(qapp.analytics_modal, AnalyticsModal)
 
+    def test_logged_events_are_recorded_for_analytics(self, qapp):
+        """Events shown in the activity log must also be retained."""
+        qapp.setup_ui()
+        qapp.session_events.clear()
+
+        qapp.hardening_manager.status_changed.emit(True)
+
+        assert qapp.session_events, "nothing was recorded for analytics"
+
+    def test_opening_analytics_passes_the_recorded_events(self, qapp):
+        """The dialog reported zero of everything because it was never fed."""
+        qapp.setup_ui()
+        qapp.session_events.clear()
+        qapp.hardening_manager.error_occurred.emit("something failed")
+
+        qapp.system_tray.analytics_clicked.emit()
+
+        assert qapp.analytics_modal.events == qapp.session_events
+
 
 class TestFirstRunOnboarding:
     """The wizard was written for first-run setup and never shown."""
