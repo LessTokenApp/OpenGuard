@@ -43,8 +43,7 @@ class AnalyticsEngine:
         cursor = conn.cursor()
 
         # Create events table
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -52,8 +51,7 @@ class AnalyticsEngine:
                 severity TEXT NOT NULL,
                 category TEXT DEFAULT ''
             )
-            """
-        )
+            """)
 
         conn.commit()
         conn.close()

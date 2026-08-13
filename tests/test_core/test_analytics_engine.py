@@ -57,9 +57,7 @@ class TestAnalyticsEngineInstantiation:
         # Verify the events table exists by connecting to the database
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='events'"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='events'")
         assert cursor.fetchone() is not None
         conn.close()
 
@@ -212,9 +210,7 @@ class TestIngestToSqlite:
         engine = AnalyticsEngine(db_path=db_path)
 
         now = datetime.now()
-        event = Event(
-            timestamp=now, event="Test event", severity="SUCCESS", category="test"
-        )
+        event = Event(timestamp=now, event="Test event", severity="SUCCESS", category="test")
 
         count = engine.ingest_to_sqlite([event])
         assert count == 1
@@ -237,10 +233,7 @@ class TestIngestToSqlite:
         engine = AnalyticsEngine(db_path=db_path)
 
         now = datetime.now()
-        events = [
-            Event(timestamp=now, event=f"Event {i}", severity="SUCCESS")
-            for i in range(5)
-        ]
+        events = [Event(timestamp=now, event=f"Event {i}", severity="SUCCESS") for i in range(5)]
 
         count = engine.ingest_to_sqlite(events)
         assert count == 5
@@ -308,10 +301,7 @@ class TestGet24hRiskScore:
         engine = AnalyticsEngine(db_path=db_path)
 
         now = datetime.now()
-        events = [
-            Event(timestamp=now, event=f"Event {i}", severity="SUCCESS")
-            for i in range(5)
-        ]
+        events = [Event(timestamp=now, event=f"Event {i}", severity="SUCCESS") for i in range(5)]
         engine.ingest_to_sqlite(events)
 
         score = engine.get_24h_risk_score()
@@ -498,9 +488,7 @@ class TestGetThreatTimeline:
 
         now = datetime.now()
         events = [
-            Event(
-                timestamp=now - timedelta(hours=i), event=f"Event {i}", severity="ERROR"
-            )
+            Event(timestamp=now - timedelta(hours=i), event=f"Event {i}", severity="ERROR")
             for i in range(5)
         ]
         # Insert in reverse order
@@ -524,9 +512,7 @@ class TestGetThreatTimeline:
         now = datetime.now()
         events = [
             Event(timestamp=now - timedelta(days=5), event="Event 5 days old", severity="ERROR"),
-            Event(
-                timestamp=now - timedelta(days=10), event="Event 10 days old", severity="ERROR"
-            ),
+            Event(timestamp=now - timedelta(days=10), event="Event 10 days old", severity="ERROR"),
         ]
         engine.ingest_to_sqlite(events)
 
@@ -547,9 +533,7 @@ class TestGetThreatTimeline:
         now = datetime.now()
         events = [
             Event(timestamp=now - timedelta(days=5), event="Event 5 days old", severity="ERROR"),
-            Event(
-                timestamp=now - timedelta(days=15), event="Event 15 days old", severity="ERROR"
-            ),
+            Event(timestamp=now - timedelta(days=15), event="Event 15 days old", severity="ERROR"),
         ]
         engine.ingest_to_sqlite(events)
 
@@ -569,9 +553,7 @@ class TestGetThreatTimeline:
         now = datetime.now()
         events = [
             Event(timestamp=now, event="Recent event", severity="ERROR"),
-            Event(
-                timestamp=now - timedelta(days=10), event="Old event", severity="ERROR"
-            ),
+            Event(timestamp=now - timedelta(days=10), event="Old event", severity="ERROR"),
         ]
         engine.ingest_to_sqlite(events)
 

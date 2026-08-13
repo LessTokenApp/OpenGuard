@@ -1,15 +1,15 @@
 """Qt stylesheet system with dark mode support for OpenGuard UI."""
 
 # Color tokens for status indicators
-COLOR_SAFE = "#22C55E"      # Green
-COLOR_WARN = "#EAB308"      # Amber
-COLOR_ERROR = "#EF4444"     # Red
+COLOR_SAFE = "#22C55E"  # Green
+COLOR_WARN = "#EAB308"  # Amber
+COLOR_ERROR = "#EF4444"  # Red
 
 # Background and text colors
-COLOR_BG_DARK = "#1F2937"   # Dark gray
+COLOR_BG_DARK = "#1F2937"  # Dark gray
 COLOR_BG_LIGHT = "#FFFFFF"  # White
-COLOR_TEXT_DARK = "#F3F4F6" # Light text
-COLOR_TEXT_LIGHT = "#1F2937" # Dark text
+COLOR_TEXT_DARK = "#F3F4F6"  # Light text
+COLOR_TEXT_LIGHT = "#1F2937"  # Dark text
 
 
 def get_stylesheet(dark_mode: bool = True) -> str:

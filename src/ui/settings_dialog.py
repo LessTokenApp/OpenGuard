@@ -232,7 +232,6 @@ class SettingsDialog(QDialog):
         """
         if level not in ["Basic", "Moderate", "Relaxed"]:
             raise ValueError(
-                f"Invalid firewall level: {level}. "
-                f"Must be one of: Basic, Moderate, Relaxed"
+                f"Invalid firewall level: {level}. " f"Must be one of: Basic, Moderate, Relaxed"
             )
         self.firewall_combo.setCurrentText(level)

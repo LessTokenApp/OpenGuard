@@ -25,7 +25,6 @@ from src.models.settings import Settings
 from src.ui.main_window import MainWindow
 from src.ui.settings_dialog import SettingsDialog
 
-
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -387,9 +386,7 @@ class TestAnalyticsEngineWorkflow:
 
         assert db_count == 3
 
-    def test_read_ingest_and_calculate_risk_score_workflow(
-        self, temp_jsonl_file, temp_db_file
-    ):
+    def test_read_ingest_and_calculate_risk_score_workflow(self, temp_jsonl_file, temp_db_file):
         """Test complete workflow: read → ingest → calculate risk score.
 
         Verifies:
@@ -734,12 +731,10 @@ class TestConfigManagerSettingsDialogIntegration:
             qapp: pytest-qt fixture for QApplication
         """
         # Create partial config file
-        temp_config_file.write_text(
-            """
+        temp_config_file.write_text("""
 firewall_level: Basic
 dns_provider: Google
-"""
-        )
+""")
 
         config_mgr = ConfigManager(config_path=temp_config_file)
         settings = config_mgr.load_config()
