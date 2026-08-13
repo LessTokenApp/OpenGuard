@@ -79,6 +79,18 @@ extend-exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+exclude = [
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg",
+    "build",
+    "dist",
+]
+
+# Rule selection lives under [tool.ruff.lint]; the top-level form is deprecated
+# and made the whole config fail to load.
+[tool.ruff.lint]
 select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
@@ -90,18 +102,9 @@ select = [
 ]
 ignore = [
     "E501",   # line too long, handled by black
-    "W503",   # line break before binary operator
-]
-exclude = [
-    ".venv",
-    "venv",
-    ".eggs",
-    "*.egg",
-    "build",
-    "dist",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["src"]
 known-third-party = ["PyQt6"]
 

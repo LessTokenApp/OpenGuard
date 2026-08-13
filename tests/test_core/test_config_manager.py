@@ -71,8 +71,7 @@ class TestLoadConfig:
         """
         config_file = temp_config_dir / "config.yaml"
         # Create a minimal config file
-        config_file.write_text(
-            """
+        config_file.write_text("""
 firewall_level: Basic
 dns_provider: Google
 dns_enabled: false
@@ -83,8 +82,7 @@ systray_enabled: true
 analytics_enabled: false
 retention_days: 30
 show_daily_tips: false
-"""
-        )
+""")
 
         manager = ConfigManager(config_path=config_file)
         settings = manager.load_config()
@@ -128,12 +126,10 @@ show_daily_tips: false
         """
         config_file = temp_config_dir / "config.yaml"
         # Create a partial config file (only some fields)
-        config_file.write_text(
-            """
+        config_file.write_text("""
 firewall_level: Relaxed
 dns_enabled: false
-"""
-        )
+""")
 
         manager = ConfigManager(config_path=config_file)
         settings = manager.load_config()
@@ -169,12 +165,10 @@ dns_enabled: false
         """
         config_file = temp_config_dir / "config.yaml"
         # Create a config with invalid firewall level
-        config_file.write_text(
-            """
+        config_file.write_text("""
 firewall_level: InvalidLevel
 dns_provider: Google
-"""
-        )
+""")
 
         manager = ConfigManager(config_path=config_file)
         settings = manager.load_config()
@@ -190,14 +184,12 @@ dns_provider: Google
             temp_config_dir: Temporary directory fixture
         """
         config_file = temp_config_dir / "config.yaml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 firewall_level: Basic
 dns_enabled: true
 retention_days: 60
 analytics_enabled: false
-"""
-        )
+""")
 
         manager = ConfigManager(config_path=config_file)
         settings = manager.load_config()

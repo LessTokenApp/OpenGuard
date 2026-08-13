@@ -58,8 +58,9 @@ class AnalyticsModal(QDialog):
         threat_count = sum(1 for e in self.events if e.severity in ["WARN", "ERROR"])
 
         # Calculate 24h risk
-        last_24h = [e for e in self.events
-                   if (datetime.now() - e.timestamp).total_seconds() < 86400]
+        last_24h = [
+            e for e in self.events if (datetime.now() - e.timestamp).total_seconds() < 86400
+        ]
         risk_24h_count = sum(1 for e in last_24h if e.severity in ["WARN", "ERROR"])
 
         if risk_24h_count == 0:
@@ -69,9 +70,11 @@ class AnalyticsModal(QDialog):
         else:
             risk_status = "HIGH"
 
-        stats_text = f"Total Events: {total}\n" \
-                     f"Threats Blocked: {threat_count}\n" \
-                     f"Last 24h Risk: {risk_status}"
+        stats_text = (
+            f"Total Events: {total}\n"
+            f"Threats Blocked: {threat_count}\n"
+            f"Last 24h Risk: {risk_status}"
+        )
 
         if self.is_pro:
             stats_text += "\n📈 7-Day Trends: Available [Graph]"

@@ -216,9 +216,7 @@ class TestEnableHardening:
         assert result is True
 
     @patch("src.core.hardening_manager.subprocess.run")
-    def test_enable_hardening_emits_error_signal_on_failure(
-        self, mock_run, qapp, qtbot
-    ):
+    def test_enable_hardening_emits_error_signal_on_failure(self, mock_run, qapp, qtbot):
         """Test enable_hardening emits error_occurred signal on failure.
 
         Args:
@@ -353,9 +351,7 @@ class TestDisableHardening:
         assert result is True
 
     @patch("src.core.hardening_manager.subprocess.run")
-    def test_disable_hardening_emits_error_signal_on_failure(
-        self, mock_run, qapp, qtbot
-    ):
+    def test_disable_hardening_emits_error_signal_on_failure(self, mock_run, qapp, qtbot):
         """Test disable_hardening emits error_occurred signal on failure.
 
         Args:

@@ -79,6 +79,7 @@ class TestOnboardingWizardSettings:
 
         # Find and select Basic radio button
         from PyQt6.QtWidgets import QRadioButton
+
         for button in wizard.findChildren(QRadioButton):
             if "Basic" in button.text():
                 button.setChecked(True)
@@ -100,6 +101,7 @@ class TestOnboardingWizardSettings:
 
         # Find and select Relaxed radio button
         from PyQt6.QtWidgets import QRadioButton
+
         for button in wizard.findChildren(QRadioButton):
             if "Relaxed" in button.text():
                 button.setChecked(True)
