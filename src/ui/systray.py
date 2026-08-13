@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
 
@@ -20,11 +20,13 @@ class SystemTray(QSystemTrayIcon):
     Signals:
         toggle_clicked: Emitted when toggle protection action is selected
         settings_clicked: Emitted when settings action is selected
+        analytics_clicked: Emitted when the analytics action is selected
         exit_clicked: Emitted when exit action is selected
     """
 
     toggle_clicked = pyqtSignal()
     settings_clicked = pyqtSignal()
+    analytics_clicked = pyqtSignal()
     exit_clicked = pyqtSignal()
 
     def __init__(self) -> None:
@@ -172,12 +174,8 @@ class SystemTray(QSystemTrayIcon):
         self.settings_clicked.emit()
 
     def _on_analytics_clicked(self) -> None:
-        """Handle analytics action.
-
-        Reserved for future implementation.
-        """
-        # Future implementation: open analytics window
-        pass
+        """Handle analytics action."""
+        self.analytics_clicked.emit()
 
     def _on_help_clicked(self) -> None:
         """Handle help action.

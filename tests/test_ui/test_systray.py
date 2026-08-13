@@ -184,3 +184,17 @@ class TestSystemTraySignals:
         with qtbot.waitSignal(systray.exit_clicked, timeout=1000):
             # Trigger the exit action
             systray.exit_action.trigger()
+
+
+class TestAnalyticsAction:
+    """The Analytics menu entry existed but its handler was a stub."""
+
+    def test_analytics_action_emits_a_signal(self, qapp):
+        """Choosing Analytics must notify listeners rather than do nothing."""
+        tray = SystemTray()
+        received = []
+        tray.analytics_clicked.connect(lambda: received.append(True))
+
+        tray.analytics_action.trigger()
+
+        assert received, "Analytics menu entry emitted nothing"
