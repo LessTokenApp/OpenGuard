@@ -5,6 +5,7 @@ script (OpenGuard.ps1) to enable/disable system hardening features.
 """
 
 import subprocess
+import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -22,7 +23,7 @@ class HardeningManager(QObject):
     """
 
     status_changed = pyqtSignal(bool)  # is_protected
-    error_occurred = pyqtSignal(str)   # error message
+    error_occurred = pyqtSignal(str)  # error message
 
     def __init__(self):
         """Initialize HardeningManager.
@@ -30,10 +31,51 @@ class HardeningManager(QObject):
         Sets up the backend path and initial protection status.
         """
         super().__init__()
-        self.backend_path = (
-            Path(__file__).parent.parent.parent / "backend" / "OpenGuard.ps1"
-        )
+        self.backend_path = self._resolve_backend_path()
         self.is_protected = False
+
+    @staticmethod
+    def _resolve_backend_path() -> Path:
+        """Locate the PowerShell entry script for the current environment.
+
+        PyInstaller does not bundle the .ps1 files, and the installer copies
+        them to {app}\\scripts, so a frozen build looks beside the executable.
+        A source checkout uses the script at the repository root.
+
+        Returns:
+            Path: Location of OpenGuard.ps1, which may not exist.
+        """
+        if getattr(sys, "frozen", False):
+            return Path(sys.executable).parent / "scripts" / "OpenGuard.ps1"
+
+        return Path(__file__).resolve().parents[2] / "OpenGuard.ps1"
+
+    def _build_command(self, action: str, *extra: str) -> list[str]:
+        """Assemble the argv for a backend call.
+
+        argv is a list rather than a string so that an installed path such as
+        C:\\Program Files\\OpenGuard\\scripts is passed as one argument instead
+        of being split on its space. The shipped script is unsigned, so the
+        execution policy is bypassed for this invocation only.
+
+        Args:
+            action: Value for the script's -Action parameter.
+            *extra: Additional arguments appended after the action.
+
+        Returns:
+            list[str]: Full argument vector for subprocess.
+        """
+        return [
+            "powershell.exe",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(self.backend_path),
+            "-Action",
+            action,
+            *extra,
+        ]
 
     def enable_hardening(self, level: str = "Moderate") -> bool:
         """Call PowerShell to enable hardening.
@@ -46,12 +88,11 @@ class HardeningManager(QObject):
             bool: True if hardening was enabled successfully, False otherwise.
         """
         try:
-            cmd = (
-                f'powershell.exe -NoProfile -Command '
-                f'"& {{.\\backend\\OpenGuard.ps1 -Action Enable -Level {level}}}"'
-            )
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=30
+                self._build_command("Enable", "-Level", level),
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
 
             if result.returncode == 0:
@@ -76,12 +117,11 @@ class HardeningManager(QObject):
             bool: True if hardening was disabled successfully, False otherwise.
         """
         try:
-            cmd = (
-                f'powershell.exe -NoProfile -Command '
-                f'"& {{.\\backend\\OpenGuard.ps1 -Action Disable}}"'
-            )
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=30
+                self._build_command("Disable"),
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
 
             if result.returncode == 0:
