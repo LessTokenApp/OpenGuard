@@ -262,7 +262,9 @@ class TestDisableHardening:
         result = manager.disable_hardening()
 
         assert result is True
-        assert manager.get_status() is False
+        # is_protected is the cached outcome of the call just made; get_status()
+        # re-queries the system, which is a different question.
+        assert manager.is_protected is False
 
     @patch("src.core.hardening_manager.subprocess.run")
     def test_disable_hardening_subprocess_call(self, mock_run, qapp):
@@ -307,7 +309,7 @@ class TestDisableHardening:
         result = manager.disable_hardening()
 
         assert result is False
-        assert manager.get_status() is True  # Status unchanged
+        assert manager.is_protected is True  # Status unchanged
 
     @patch("src.core.hardening_manager.subprocess.run")
     def test_disable_hardening_exception(self, mock_run, qapp):
@@ -424,7 +426,7 @@ class TestGetStatus:
         manager = HardeningManager()
         manager.is_protected = True
         manager.disable_hardening()
-        status = manager.get_status()
+        status = manager.is_protected
 
         assert status is False
 

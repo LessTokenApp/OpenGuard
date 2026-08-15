@@ -651,8 +651,15 @@ function Test-IsPublicNetwork {
 }
 
 function Test-IsHardeningActive {
-    $llmnr = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
-    if ($llmnr -and $llmnr.EnableMulticast -eq 0) { return $true }
+    # Only OpenGuard creates firewall rules under this prefix, so their presence
+    # is the one signal that unambiguously means this tool applied hardening.
+    #
+    # LLMNR alone used to answer this, which was wrong: group policy or another
+    # security product can disable LLMNR, and OpenGuard would then report that
+    # as its own protection on a machine where it had never run.
+    $rules = Get-NetFirewallRule -DisplayName "OpenGuard-*" -ErrorAction SilentlyContinue
+    if ($rules) { return $true }
+
     return $false
 }
 

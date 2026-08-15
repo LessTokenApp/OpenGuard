@@ -167,7 +167,7 @@ class TestToggleProtectionWorkflow:
         main_window = MainWindow()
 
         # Verify initial state
-        assert hardening_mgr.get_status() is False
+        assert hardening_mgr.is_protected is False
         assert main_window.is_protected is True  # Default state
 
         # Set initial status to unprotected
@@ -256,7 +256,7 @@ class TestToggleProtectionWorkflow:
 
         # Assertions
         assert result is True
-        assert hardening_mgr.get_status() is False
+        assert hardening_mgr.is_protected is False
         assert len(status_changed_signal_emitted) == 1
         assert status_changed_signal_emitted[0] is False
         assert "UNPROTECTED" in main_window.status_label.toPlainText()

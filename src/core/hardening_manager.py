@@ -140,9 +140,39 @@ class HardeningManager(QObject):
             return False
 
     def get_status(self) -> bool:
-        """Get current protection status.
+        """Ask the system whether hardening is currently applied.
+
+        This used to return an in-memory flag that only this process ever set,
+        so a machine that really was hardened still reported as unprotected.
+
+        The backend answers through its exit code: 0 active, 1 inactive.
+        Anything else means the question could not be answered, most often
+        because privileges were missing. That resolves to False: a tool that
+        reports whether someone is exposed must never turn "unknown" into
+        "protected".
 
         Returns:
-            bool: True if system is protected, False otherwise.
+            bool: True only when the backend confirms hardening is applied.
         """
+        try:
+            result = subprocess.run(
+                self._build_command("Status"),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except Exception as e:
+            self.error_occurred.emit(str(e))
+            self.is_protected = False
+            return False
+
+        if result.returncode == 0:
+            self.is_protected = True
+        else:
+            if result.returncode != 1:
+                self.error_occurred.emit(
+                    result.stderr.strip() or f"Status check failed ({result.returncode})"
+                )
+            self.is_protected = False
+
         return self.is_protected

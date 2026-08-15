@@ -73,3 +73,57 @@ class TestBackendInvocation:
         manager.enable_hardening()
 
         assert "Bypass" in captured_command["cmd"]
+
+
+class TestStatusIsQueriedFromTheSystem:
+    """get_status() returned a flag that nothing outside the process set.
+
+    It reported the in-memory value, initialised to False, so a machine that
+    really was hardened still showed as unprotected, and the answer never
+    depended on the system at all.
+    """
+
+    def test_status_asks_the_backend(self, captured_command):
+        """The answer must come from the system, not from a local variable."""
+        manager = HardeningManager()
+
+        manager.get_status()
+
+        assert "Status" in captured_command["cmd"]
+
+    def test_exit_zero_means_protected(self, monkeypatch):
+        """The script signals an active state with exit code 0."""
+        manager = HardeningManager()
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, "", ""),
+        )
+
+        assert manager.get_status() is True
+
+    def test_exit_one_means_unprotected(self, monkeypatch):
+        """Exit code 1 is the script's answer for an inactive state."""
+        manager = HardeningManager()
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", ""),
+        )
+
+        assert manager.get_status() is False
+
+    def test_failure_reports_unprotected(self, monkeypatch):
+        """Any other outcome must fail towards claiming less, not more.
+
+        Exit code 2 means privileges were missing, so the real state is
+        unknown. A security tool must not resolve that into "protected".
+        """
+        manager = HardeningManager()
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda cmd, **kw: subprocess.CompletedProcess(cmd, 2, "", "denied"),
+        )
+
+        assert manager.get_status() is False
