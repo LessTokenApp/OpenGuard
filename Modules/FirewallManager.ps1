@@ -1,4 +1,4 @@
-# FirewallManager.ps1 - v0.5.0
+﻿# FirewallManager.ps1 - v0.5.0
 # Adaptive Firewall Rules: Basic / Moderate / Relaxed
 
 $RulePrefix = "OpenGuard-Adaptive"

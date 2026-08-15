@@ -1,5 +1,17 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 # OpenGuard v0.6.0 - Analytics Dashboard + Advanced Features
+
+# Run with no arguments for the interactive menu, unchanged.
+# Pass -Action to drive the same operations programmatically, which is how the
+# GUI calls this script. In that mode nothing prompts and nothing is drawn: the
+# exit code carries the result.
+param(
+    [ValidateSet("Enable", "Disable", "Status")]
+    [string]$Action,
+
+    [ValidateSet("Basic", "Moderate", "Relaxed")]
+    [string]$Level = "Moderate"
+)
 
 $Version   = "0.6.0"
 
@@ -291,7 +303,10 @@ function Test-IsAdmin {
     return $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-if (-not (Test-IsAdmin)) {
+# Only relaunch for the interactive user. Re-elevating does not carry -Action
+# through, so a programmatic call would silently open a menu window and report
+# success; in that mode a missing privilege must fail loudly instead.
+if (-not $Action -and -not (Test-IsAdmin)) {
     Write-Host ""
     Write-Host "  Yonetici yetkisi gerekiyor. Yeniden baslatiliyor..." -ForegroundColor Yellow
     $scriptPath = $MyInvocation.MyCommand.Definition
@@ -789,6 +804,38 @@ function Show-Menu {
     Write-Host "  OpenGuard trafigi sifrelemez." -ForegroundColor DarkYellow
     Write-Host "  Sadece saldiri yuzeyini kucultur." -ForegroundColor DarkYellow
     Write-Host ""
+}
+
+# --- Non-interactive entry point ---
+# Placed after every function definition and before anything that prompts or
+# draws, so a programmatic call never reaches the menu loop.
+if ($Action) {
+    if (-not (Test-IsAdmin)) {
+        Write-Error "OpenGuard requires Administrator privileges."
+        exit 2
+    }
+
+    try {
+        switch ($Action) {
+            "Enable" {
+                Enable-Hardening
+                Enable-AdaptiveRules -Level $Level
+                exit 0
+            }
+            "Disable" {
+                Restore-Defaults
+                exit 0
+            }
+            "Status" {
+                # Exit code is the answer: 0 active, 1 inactive.
+                if (Test-IsHardeningActive) { exit 0 } else { exit 1 }
+            }
+        }
+    }
+    catch {
+        Write-Error $_.Exception.Message
+        exit 3
+    }
 }
 
 # --- Baslangic: yari otomatik kontrol ---

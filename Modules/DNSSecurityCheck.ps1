@@ -1,4 +1,4 @@
-# DNSSecurityCheck.ps1 - v0.5.0
+﻿# DNSSecurityCheck.ps1 - v0.5.0
 # DNS Security Analysis & DoH Detection
 
 $TrustedDNS = @{

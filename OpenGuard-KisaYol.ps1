@@ -1,4 +1,4 @@
-$Desktop = [Environment]::GetFolderPath("Desktop")
+﻿$Desktop = [Environment]::GetFolderPath("Desktop")
 $Target  = Join-Path $Desktop "OpenGuard-Başlat.bat"
 $ShortcutPath = Join-Path $Desktop "OpenGuard.lnk"
 

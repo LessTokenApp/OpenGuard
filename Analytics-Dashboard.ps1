@@ -1,4 +1,4 @@
-# Analytics Dashboard v0.6.0
+﻿# Analytics Dashboard v0.6.0
 # OpenGuard Threat Timeline & Statistics
 
 function Get-AnalyticsData {
