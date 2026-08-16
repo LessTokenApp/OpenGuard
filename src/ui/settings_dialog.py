@@ -25,7 +25,9 @@ class SettingsDialog(QDialog):
 
     Displays a tabbed interface with three tabs:
     - Protection: Firewall level, DNS provider, and security options
-    - Analytics: Event logging and data retention settings
+    - Logging: Event logging and data retention settings (named "Logging" rather
+      than "Analytics" to avoid colliding with the systray's separate "Analytics"
+      menu item, which opens the AnalyticsModal dashboard, not this tab)
     - Appearance: UI preferences and startup options
 
     Signals:
@@ -60,9 +62,10 @@ class SettingsDialog(QDialog):
         protection_tab = self._create_protection_tab()
         self.tabs.addTab(protection_tab, "🛡️  Protection")
 
-        # Tab 2: Analytics
-        analytics_tab = self._create_analytics_tab()
-        self.tabs.addTab(analytics_tab, "📊 Analytics")
+        # Tab 2: Logging (named to avoid colliding with the systray's separate
+        # "Analytics" menu item, which opens the AnalyticsModal dashboard)
+        logging_tab = self._create_analytics_tab()
+        self.tabs.addTab(logging_tab, "📋 Logging")
 
         # Tab 3: Appearance
         appearance_tab = self._create_appearance_tab()
@@ -138,7 +141,7 @@ class SettingsDialog(QDialog):
         return widget
 
     def _create_analytics_tab(self) -> QWidget:
-        """Create analytics settings tab.
+        """Create logging settings tab (event logging & retention preferences).
 
         Contains:
         - Analytics toggle
