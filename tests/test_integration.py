@@ -160,6 +160,7 @@ class TestToggleProtectionWorkflow:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         # Create HardeningManager and MainWindow
@@ -222,6 +223,7 @@ class TestToggleProtectionWorkflow:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         # Create HardeningManager and MainWindow
@@ -798,6 +800,7 @@ class TestCompleteEndToEndWorkflow:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         # Step 1: Load config and display in dialog

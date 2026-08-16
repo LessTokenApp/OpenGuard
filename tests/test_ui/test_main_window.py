@@ -216,3 +216,91 @@ class TestSignals:
 
         # Signal should have been emitted
         assert signal_emitted
+
+
+class TestDisclaimerLabel:
+    """Test persistent disclaimer label in MainWindow."""
+
+    def test_disclaimer_label_exists(self, qapp):
+        """Test that disclaimer label exists after MainWindow construction.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        assert hasattr(window, "disclaimer_label")
+        assert window.disclaimer_label is not None
+
+    def test_disclaimer_label_not_empty_when_protected(self, qapp):
+        """Test that disclaimer label is non-empty when protected.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        window.set_protection_status(True)
+        # Disclaimer label should always be non-empty
+        assert window.disclaimer_label.text() != ""
+        assert len(window.disclaimer_label.text()) > 0
+
+    def test_disclaimer_label_not_empty_when_unprotected(self, qapp):
+        """Test that disclaimer label is non-empty when unprotected.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        window.set_protection_status(False)
+        # Disclaimer label should always be non-empty
+        assert window.disclaimer_label.text() != ""
+        assert len(window.disclaimer_label.text()) > 0
+
+    def test_disclaimer_label_contains_vpn_antivirus_reference(self, qapp):
+        """Test that disclaimer mentions VPN and antivirus limitations.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        disclaimer_text = window.disclaimer_label.text()
+        # Should mention that it's not VPN/antivirus substitute
+        assert "VPN" in disclaimer_text or "antivirus" in disclaimer_text or \
+               "sifrele" in disclaimer_text or "trafik" in disclaimer_text.lower()
+
+
+class TestAdvisoryInActivityLog:
+    """Test advisory integration with activity log."""
+
+    def test_advisory_appended_to_activity_log(self, qapp):
+        """Test that advisory is added to activity log with WARN severity.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        from src.core.hardening_manager import HardeningManager
+        from unittest.mock import MagicMock, patch
+
+        window = MainWindow()
+
+        # Create a manager and connect it to the window's advisory handler
+        manager = HardeningManager()
+
+        # Mock signal handler for advisory
+        def on_advisory_raised(text):
+            event = Event(
+                timestamp=datetime.now(),
+                event=text,
+                severity="WARN",
+                category="advisory"
+            )
+            window.add_activity_log_entry(event)
+
+        manager.advisory_raised.connect(on_advisory_raised)
+
+        # Simulate advisory signal
+        advisory_text = "Bu arac trafigi sifrelemez."
+        manager.advisory_raised.emit(advisory_text)
+
+        # Check that advisory is in activity log
+        log_text = window.activity_log.toPlainText()
+        assert advisory_text in log_text

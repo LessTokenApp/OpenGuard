@@ -4,11 +4,18 @@ This module handles inter-process communication (IPC) with the PowerShell backen
 script (OpenGuard.ps1) to enable/disable system hardening features.
 """
 
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, pyqtSignal
+
+# Fallback advisory text when RISK UYARISI block cannot be parsed from stdout
+FALLBACK_ADVISORY = (
+    "Bu aracı, trafiği şifrelemez. Dinleme ve MITM riskini ortadan kaldırmaz. "
+    "Sadece cihazın keşfedilmesini zorlaştırır."
+)
 
 
 class HardeningManager(QObject):
@@ -20,10 +27,12 @@ class HardeningManager(QObject):
     Signals:
         status_changed: Emitted when hardening status changes (bool: is_protected)
         error_occurred: Emitted when an error occurs (str: error message)
+        advisory_raised: Emitted after successful hardening with advisory text (str: advisory)
     """
 
     status_changed = pyqtSignal(bool)  # is_protected
     error_occurred = pyqtSignal(str)  # error message
+    advisory_raised = pyqtSignal(str)  # advisory text
 
     def __init__(self):
         """Initialize HardeningManager.
@@ -33,6 +42,51 @@ class HardeningManager(QObject):
         super().__init__()
         self.backend_path = self._resolve_backend_path()
         self.is_protected = False
+
+    @staticmethod
+    def _parse_risk_advisory(stdout: str) -> str:
+        """Extract the RISK UYARISI advisory block from PowerShell stdout.
+
+        Looks for the RISK UYARISI block delimited by ============ lines,
+        extracts the advisory text between them, and removes blank lines.
+
+        If the block is not found, returns the fallback advisory text.
+
+        Args:
+            stdout: The captured stdout from the PowerShell subprocess
+
+        Returns:
+            str: The advisory text (parsed or fallback)
+        """
+        if not stdout:
+            return FALLBACK_ADVISORY
+
+        # Pattern to match the RISK UYARISI block
+        # Matches: equals line, RISK UYARISI header, advisory lines, equals line
+        pattern = r"={10,}.*?RISK UYARISI.*?={10,}"
+        match = re.search(pattern, stdout, re.DOTALL | re.IGNORECASE)
+
+        if not match:
+            return FALLBACK_ADVISORY
+
+        # Extract the matched block
+        block = match.group(0)
+
+        # Split by lines and filter out the delimiters and header
+        lines = block.split("\n")
+        advisory_lines = []
+
+        for line in lines:
+            stripped = line.strip()
+            # Skip empty lines, delimiter lines, and the RISK UYARISI header
+            if stripped and not stripped.startswith("=") and "RISK UYARISI" not in stripped:
+                advisory_lines.append(stripped)
+
+        if not advisory_lines:
+            return FALLBACK_ADVISORY
+
+        # Join the advisory lines with newlines
+        return "\n".join(advisory_lines)
 
     @staticmethod
     def _resolve_backend_path() -> Path:
@@ -98,6 +152,9 @@ class HardeningManager(QObject):
             if result.returncode == 0:
                 self.is_protected = True
                 self.status_changed.emit(True)
+                # Parse and emit the advisory text
+                advisory_text = self._parse_risk_advisory(result.stdout)
+                self.advisory_raised.emit(advisory_text)
                 return True
             else:
                 error_msg = result.stderr or "Hardening failed"

@@ -5,6 +5,7 @@ from datetime import datetime
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QHBoxLayout,
+    QLabel,
     QMainWindow,
     QPushButton,
     QTextEdit,
@@ -13,7 +14,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.models.event import Event
-from src.ui.styles import get_stylesheet
+from src.ui.styles import get_stylesheet, COLOR_WARN
 
 
 class MainWindow(QMainWindow):
@@ -37,6 +38,7 @@ class MainWindow(QMainWindow):
         - Window title and size
         - Status card with protection indicator
         - Toggle protection button
+        - Persistent disclaimer label
         - Activity log for recent events
         """
         super().__init__()
@@ -69,6 +71,15 @@ class MainWindow(QMainWindow):
         status_layout.addWidget(self.toggle_button)
 
         main_layout.addLayout(status_layout)
+
+        # Persistent disclaimer label
+        self.disclaimer_label = QLabel()
+        self.disclaimer_label.setStyleSheet(f"color: {COLOR_WARN};")
+        self.disclaimer_label.setText(
+            "Uyarı: OpenGuard trafiği şifrelemez ve VPN ya da antivirüs yerine geçmez."
+        )
+        self.disclaimer_label.setWordWrap(True)
+        main_layout.addWidget(self.disclaimer_label)
 
         # Activity log
         activity_label = QTextEdit()

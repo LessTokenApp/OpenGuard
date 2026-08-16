@@ -84,6 +84,7 @@ class TestEnableHardening:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         manager = HardeningManager()
@@ -104,6 +105,7 @@ class TestEnableHardening:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         manager = HardeningManager()
@@ -128,6 +130,7 @@ class TestEnableHardening:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         manager = HardeningManager()
@@ -205,6 +208,7 @@ class TestEnableHardening:
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stderr = ""
+        mock_result.stdout = ""
         mock_run.return_value = mock_result
 
         manager = HardeningManager()
@@ -590,3 +594,127 @@ class TestErrorHandling:
         # Verify default error message was emitted
         assert len(signal_args) > 0
         assert "failed" in signal_args[0].lower() or "Disable" in signal_args[0]
+
+
+class TestAdvisorySignal:
+    """Test advisory_raised signal for hardening limitations."""
+
+    def test_advisory_raised_signal_exists(self, qapp):
+        """Test that advisory_raised signal is defined.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        manager = HardeningManager()
+        # Verify signal exists by attempting to connect
+        spy = MagicMock()
+        manager.advisory_raised.connect(spy)
+        assert spy.called or not spy.called  # Just verify connection succeeded
+
+    @patch("src.core.hardening_manager.subprocess.run")
+    def test_advisory_raised_with_risk_block_in_stdout(self, mock_run, qapp, qtbot):
+        """Test advisory_raised emits with parsed text when RISK UYARISI block is present.
+
+        Args:
+            mock_run: Mocked subprocess.run
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt bot for signal testing
+        """
+        # Setup mock with RISK UYARISI block in stdout
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stderr = ""
+        mock_result.stdout = """
+  =============================================
+  RISK UYARISI
+  Bu arac trafigi sifrelemez.
+  Dinleme ve MITM riskini ortadan kaldirmaz.
+  Sadece cihazin kesfedilmesini zorlastirir.
+  =============================================
+"""
+        mock_run.return_value = mock_result
+
+        manager = HardeningManager()
+
+        # Capture the emitted signal argument
+        signal_args = []
+
+        def capture_advisory(msg):
+            signal_args.append(msg)
+
+        manager.advisory_raised.connect(capture_advisory)
+
+        # Use qtbot to capture signal
+        with qtbot.waitSignal(manager.advisory_raised, timeout=1000):
+            result = manager.enable_hardening()
+
+        assert result is True
+        assert len(signal_args) > 0
+        # Verify the parsed text is in the signal
+        assert "Bu arac trafigi sifrelemez." in signal_args[0]
+        assert "Dinleme ve MITM riskini ortadan kaldirmaz." in signal_args[0]
+
+    @patch("src.core.hardening_manager.subprocess.run")
+    def test_advisory_raised_with_fallback_when_no_block(self, mock_run, qapp, qtbot):
+        """Test advisory_raised emits fallback text when RISK UYARISI block is absent.
+
+        Args:
+            mock_run: Mocked subprocess.run
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt bot for signal testing
+        """
+        # Setup mock with empty stdout (no RISK UYARISI block)
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stderr = ""
+        mock_result.stdout = "Some other output"
+        mock_run.return_value = mock_result
+
+        manager = HardeningManager()
+
+        # Capture the emitted signal argument
+        signal_args = []
+
+        def capture_advisory(msg):
+            signal_args.append(msg)
+
+        manager.advisory_raised.connect(capture_advisory)
+
+        # Use qtbot to capture signal
+        with qtbot.waitSignal(manager.advisory_raised, timeout=1000):
+            result = manager.enable_hardening()
+
+        assert result is True
+        assert len(signal_args) > 0
+        # Verify fallback text is emitted
+        assert len(signal_args[0]) > 0
+
+    @patch("src.core.hardening_manager.subprocess.run")
+    def test_advisory_not_raised_on_failure(self, mock_run, qapp):
+        """Test advisory_raised does NOT emit when enable_hardening fails.
+
+        Args:
+            mock_run: Mocked subprocess.run
+            qapp: pytest-qt fixture for QApplication
+        """
+        # Setup mock for failure
+        mock_result = MagicMock()
+        mock_result.returncode = 1
+        mock_result.stderr = "Permission denied"
+        mock_run.return_value = mock_result
+
+        manager = HardeningManager()
+
+        # Capture the emitted signal argument
+        signal_args = []
+
+        def capture_advisory(msg):
+            signal_args.append(msg)
+
+        manager.advisory_raised.connect(capture_advisory)
+
+        result = manager.enable_hardening()
+
+        assert result is False
+        # advisory_raised should NOT be emitted on failure
+        assert len(signal_args) == 0

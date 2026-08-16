@@ -5,6 +5,7 @@ from datetime import datetime
 
 from PyQt6.QtWidgets import QApplication
 
+from src.core.analytics_engine import AnalyticsEngine
 from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
 from src.models.event import Event
@@ -47,7 +48,15 @@ class OpenGuardApp(QApplication):
         self.settings_dialog: SettingsDialog | None = None
         self.analytics_modal: AnalyticsModal | None = None
         self.onboarding_wizard: OnboardingWizard | None = None
-        self.session_events: list[Event] = []
+        self.analytics_engine: AnalyticsEngine | None = None
+
+    @property
+    def session_events(self) -> list[Event]:
+        """Events recorded this run, held by the engine that persists them."""
+        if self.analytics_engine is None:
+            return []
+
+        return self.analytics_engine.events
 
     def setup_ui(self) -> None:
         """Build the user interface and connect it to the backend.
@@ -59,6 +68,8 @@ class OpenGuardApp(QApplication):
 
         self.config_manager = ConfigManager()
         self.settings = self.config_manager.load_config()
+
+        self.analytics_engine = AnalyticsEngine()
 
         self.hardening_manager = HardeningManager()
         self.main_window = MainWindow()
@@ -75,6 +86,7 @@ class OpenGuardApp(QApplication):
         self.hardening_manager.status_changed.connect(self.system_tray.set_protection_status)
         self.hardening_manager.status_changed.connect(self._on_status_changed)
         self.hardening_manager.error_occurred.connect(self._on_error)
+        self.hardening_manager.advisory_raised.connect(self._on_advisory)
 
         # Both widgets default to showing protection as active. Nothing has run
         # at this point, so publish the manager's real state before the window
@@ -184,6 +196,16 @@ class OpenGuardApp(QApplication):
         """
         self._log(message, "ERROR")
 
+    def _on_advisory(self, advisory_text: str) -> None:
+        """Record a hardening advisory in the activity log.
+
+        The advisory describes the limitations of the hardening applied.
+
+        Args:
+            advisory_text: Advisory text from the hardening backend.
+        """
+        self._log(advisory_text, "WARN")
+
     def _log(self, description: str, severity: str) -> None:
         """Append an entry to the activity log.
 
@@ -198,7 +220,7 @@ class OpenGuardApp(QApplication):
             category="system",
         )
 
-        self.session_events.append(event)
+        self.analytics_engine.record(event)
         self.main_window.add_activity_log_entry(event)
 
     def run(self) -> int:
