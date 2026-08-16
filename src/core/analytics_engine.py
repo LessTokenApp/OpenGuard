@@ -167,6 +167,9 @@ class AnalyticsEngine:
     def get_24h_risk_score(self) -> str:
         """Calculate risk score based on WARN/ERROR events in the last 24 hours.
 
+        System/administrative events (category="system") are excluded from risk scoring.
+        Only genuine threat detections from external or internal monitors count.
+
         Risk score calculation:
         - 0 events: "LOW"
         - 1-2 events: "MEDIUM"
@@ -182,12 +185,13 @@ class AnalyticsEngine:
         now = datetime.now()
         cutoff_time = (now - timedelta(hours=24)).isoformat()
 
-        # Count WARN and ERROR events in the last 24 hours
+        # Count WARN and ERROR events in the last 24 hours, excluding system/administrative events
         cursor.execute(
             """
             SELECT COUNT(*) FROM events
             WHERE timestamp >= ?
             AND severity IN ('WARN', 'ERROR')
+            AND category != 'system'
             """,
             (cutoff_time,),
         )
@@ -203,7 +207,10 @@ class AnalyticsEngine:
             return "HIGH"
 
     def get_threat_timeline(self, days: int = 7) -> List[Event]:
-        """Retrieve events from the last N days, sorted by timestamp.
+        """Retrieve threat events from the last N days, sorted by timestamp.
+
+        System/administrative events (category="system") are excluded from the threat timeline.
+        Only genuine threat detections from external or internal monitors are included.
 
         Args:
             days: Number of days to look back (default: 7)
@@ -218,11 +225,12 @@ class AnalyticsEngine:
         now = datetime.now()
         cutoff_time = (now - timedelta(days=days)).isoformat()
 
-        # Retrieve events from the last N days, sorted by timestamp
+        # Retrieve threat events from the last N days, excluding system/administrative events
         cursor.execute(
             """
             SELECT timestamp, event, severity, category FROM events
             WHERE timestamp >= ?
+            AND category != 'system'
             ORDER BY timestamp ASC
             """,
             (cutoff_time,),

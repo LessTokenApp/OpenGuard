@@ -606,3 +606,106 @@ class TestGetThreatTimeline:
         # Should include recent event within last 1 day, not 2 days old
         assert len(timeline) == 1
         assert "Recent" in timeline[0].event
+
+    def test_get_24h_risk_score_ignores_system_category_events(self, tmp_path):
+        """Test get_24h_risk_score excludes system-category WARN/ERROR events.
+
+        This is the regression test for Task 18: clicking "Enable Protection" 6 times
+        should NOT result in HIGH risk, even though each logs a WARN advisory.
+        System/administrative events (category="system") must not count as threats.
+
+        Args:
+            tmp_path: pytest temp directory fixture
+        """
+        db_path = tmp_path / "test.db"
+        engine = AnalyticsEngine(db_path=db_path)
+
+        now = datetime.now()
+        # Simulate 6 "Protection enabled" cycles, each logging a WARN advisory
+        # with category="system" (as per src/app.py's _log method)
+        events = [
+            Event(
+                timestamp=now,
+                event=f"Protection enabled cycle {i}",
+                severity="WARN",
+                category="system",
+            )
+            for i in range(6)
+        ]
+        engine.ingest_to_sqlite(events)
+
+        # Risk score should be LOW because all WARN events are system/administrative
+        score = engine.get_24h_risk_score()
+        assert score == "LOW"
+
+    def test_get_24h_risk_score_counts_non_system_threat_events(self, tmp_path):
+        """Test get_24h_risk_score still counts non-system WARN/ERROR events.
+
+        The filter must not accidentally exclude everything. A real detector
+        (e.g. ProcessMonitor) will emit events with category != "system".
+
+        Args:
+            tmp_path: pytest temp directory fixture
+        """
+        db_path = tmp_path / "test.db"
+        engine = AnalyticsEngine(db_path=db_path)
+
+        now = datetime.now()
+        events = [
+            # System events should be ignored
+            Event(
+                timestamp=now,
+                event="Status change",
+                severity="WARN",
+                category="system",
+            ),
+            # Real threat events should count
+            Event(
+                timestamp=now,
+                event="Suspicious process detected",
+                severity="WARN",
+                category="threat",
+            ),
+            Event(
+                timestamp=now,
+                event="Malware signature match",
+                severity="ERROR",
+                category="threat",
+            ),
+            Event(
+                timestamp=now,
+                event="Another threat",
+                severity="ERROR",
+                category="threat",
+            ),
+        ]
+        engine.ingest_to_sqlite(events)
+
+        # Risk score should be HIGH (3 non-system WARN/ERROR events, system events ignored)
+        score = engine.get_24h_risk_score()
+        assert score == "HIGH"
+
+    def test_get_threat_timeline_excludes_system_events(self, tmp_path):
+        """Test get_threat_timeline excludes system-category events.
+
+        A threat timeline should not include the app's own status-change/advisory log.
+
+        Args:
+            tmp_path: pytest temp directory fixture
+        """
+        db_path = tmp_path / "test.db"
+        engine = AnalyticsEngine(db_path=db_path)
+
+        now = datetime.now()
+        events = [
+            Event(timestamp=now, event="Protection enabled", severity="SUCCESS", category="system"),
+            Event(timestamp=now, event="Real threat detected", severity="ERROR", category="threat"),
+            Event(timestamp=now, event="Advisory about hardening", severity="WARN", category="system"),
+        ]
+        engine.ingest_to_sqlite(events)
+
+        timeline = engine.get_threat_timeline(days=7)
+        # Should only include the non-system threat event
+        assert len(timeline) == 1
+        assert "Real threat detected" in timeline[0].event
+        assert timeline[0].category == "threat"

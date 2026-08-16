@@ -55,13 +55,20 @@ class AnalyticsModal(QDialog):
     def _update_display(self) -> None:
         """Refresh display based on events"""
         total = len(self.events)
-        threat_count = sum(1 for e in self.events if e.severity in ["WARN", "ERROR"])
+        # Exclude system/administrative events from threat count
+        threat_count = sum(
+            1 for e in self.events
+            if e.severity in ["WARN", "ERROR"] and e.category != "system"
+        )
 
-        # Calculate 24h risk
+        # Calculate 24h risk, also excluding system events
         last_24h = [
             e for e in self.events if (datetime.now() - e.timestamp).total_seconds() < 86400
         ]
-        risk_24h_count = sum(1 for e in last_24h if e.severity in ["WARN", "ERROR"])
+        risk_24h_count = sum(
+            1 for e in last_24h
+            if e.severity in ["WARN", "ERROR"] and e.category != "system"
+        )
 
         if risk_24h_count == 0:
             risk_status = "LOW"
