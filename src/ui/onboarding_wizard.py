@@ -146,8 +146,9 @@ class OnboardingWizard(QWizard):
 
         label = QLabel(
             "✅ Configuration Complete\n\n"
-            "Protection is now ON.\n"
-            "Minimize to tray to stay protected."
+            "Settings saved successfully.\n"
+            "Open the main window and use\n"
+            "the toggle button to enable protection."
         )
         layout.addWidget(label)
         layout.addStretch()

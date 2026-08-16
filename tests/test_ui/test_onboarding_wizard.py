@@ -146,3 +146,97 @@ class TestOnboardingWizardSignals:
 
         with qtbot.assertNotEmitted(wizard.completed, wait=500):
             wizard.finished.emit(0)  # Emit finished signal (0 = Rejected/Cancel)
+
+
+class TestOnboardingWizardCompletionPage:
+    """Test completion page (Screen 4) content and messaging."""
+
+    def test_completion_page_label_does_not_claim_protection_is_on(self, qapp):
+        """Test that completion page does NOT falsely claim "protection is now ON".
+
+        This verifies that the completion screen does not make false
+        statements about protection being active, since enable_hardening()
+        is never called during onboarding.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        wizard = OnboardingWizard()
+        completion_page = wizard.page(3)  # Page 4 is index 3
+
+        # Find the label widget
+        from PyQt6.QtWidgets import QLabel
+
+        label = None
+        for widget in completion_page.findChildren(QLabel):
+            label = widget
+            break
+
+        assert label is not None, "Completion page should have a label"
+        page_text = label.text()
+
+        # Assert false claim is NOT present
+        assert "is now ON" not in page_text, (
+            "Completion page should NOT claim 'is now ON' "
+            "since protection is not actually enabled"
+        )
+
+    def test_completion_page_label_mentions_configuration_saved(self, qapp):
+        """Test that completion page mentions configuration was saved.
+
+        The completion page should confirm that settings/configuration
+        were saved successfully.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        wizard = OnboardingWizard()
+        completion_page = wizard.page(3)  # Page 4 is index 3
+
+        # Find the label widget
+        from PyQt6.QtWidgets import QLabel
+
+        label = None
+        for widget in completion_page.findChildren(QLabel):
+            label = widget
+            break
+
+        assert label is not None
+        page_text = label.text()
+
+        # Assert that configuration/saving is mentioned
+        assert "Complete" in page_text or "saved" in page_text.lower(), (
+            "Completion page should mention that configuration/settings are complete or saved"
+        )
+
+    def test_completion_page_label_mentions_next_steps(self, qapp):
+        """Test that completion page tells user what to do next.
+
+        The page should instruct the user on how to enable protection
+        (e.g., via the toggle in the main window).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        wizard = OnboardingWizard()
+        completion_page = wizard.page(3)  # Page 4 is index 3
+
+        # Find the label widget
+        from PyQt6.QtWidgets import QLabel
+
+        label = None
+        for widget in completion_page.findChildren(QLabel):
+            label = widget
+            break
+
+        assert label is not None
+        page_text = label.text()
+
+        # Assert that next steps are mentioned (enable, toggle, open, turn on, etc.)
+        lower_text = page_text.lower()
+        next_step_keywords = ["enable", "toggle", "open", "turn on", "button"]
+        has_next_step = any(keyword in lower_text for keyword in next_step_keywords)
+        assert has_next_step, (
+            "Completion page should mention how to enable/toggle protection "
+            "(e.g., via button, toggle, or opening the main window)"
+        )
