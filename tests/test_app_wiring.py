@@ -359,3 +359,14 @@ class TestActivityIsReported:
         qapp.hardening_manager.error_occurred.emit("backend exploded")
 
         assert "backend exploded" in qapp.main_window.activity_log.toPlainText()
+
+    def test_hardening_advisory_appended_to_the_activity_log(self, qapp):
+        """The advisory_raised signal must be connected to the activity log."""
+        qapp.setup_ui()
+        qapp.main_window.activity_log.clear()
+
+        qapp.hardening_manager.advisory_raised.emit(
+            "Bu aracı, trafiği şifrelemez. Dinleme ve MITM riskini ortadan kaldırmaz."
+        )
+
+        assert "trafiği şifrelemez" in qapp.main_window.activity_log.toPlainText()

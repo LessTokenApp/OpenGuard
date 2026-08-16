@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.models.event import Event
-from src.ui.styles import get_stylesheet, COLOR_WARN
+from src.ui.styles import COLOR_WARN, get_stylesheet
 
 
 class MainWindow(QMainWindow):

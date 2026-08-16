@@ -599,18 +599,6 @@ class TestErrorHandling:
 class TestAdvisorySignal:
     """Test advisory_raised signal for hardening limitations."""
 
-    def test_advisory_raised_signal_exists(self, qapp):
-        """Test that advisory_raised signal is defined.
-
-        Args:
-            qapp: pytest-qt fixture for QApplication
-        """
-        manager = HardeningManager()
-        # Verify signal exists by attempting to connect
-        spy = MagicMock()
-        manager.advisory_raised.connect(spy)
-        assert spy.called or not spy.called  # Just verify connection succeeded
-
     @patch("src.core.hardening_manager.subprocess.run")
     def test_advisory_raised_with_risk_block_in_stdout(self, mock_run, qapp, qtbot):
         """Test advisory_raised emits with parsed text when RISK UYARISI block is present.
