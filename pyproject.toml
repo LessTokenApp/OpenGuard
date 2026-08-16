@@ -44,6 +44,11 @@ test = [
     "pytest-cov>=4.1.0",
     "pytest-qt>=4.2.0",
 ]
+# Build-time/asset-generation tool (installer/generate_icon.py), not a
+# runtime dependency of the running PyQt app -- kept out of `dependencies`.
+assets = [
+    "Pillow>=10.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/LessTokenApp/OpenGuard"
