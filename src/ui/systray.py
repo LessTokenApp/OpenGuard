@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QIcon, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
 
 from src.ui.styles import get_stylesheet
@@ -145,12 +145,45 @@ class SystemTray(QSystemTrayIcon):
         else:
             color = QColor("red")
 
-        # Draw a circle with the appropriate color
+        # Build a shield silhouette (64x64 space): pointed top, slanted
+        # shoulders, straight sides, curved bottom point.
+        shield = QPainterPath()
+        shield.moveTo(32, 4)
+        shield.lineTo(54, 12)
+        shield.lineTo(54, 30)
+        shield.cubicTo(54, 48, 44, 56, 32, 60)
+        shield.lineTo(10, 30)
+        shield.lineTo(10, 12)
+        shield.closeSubpath()
+
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Fill the shield with the status color.
         painter.setBrush(color)
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawEllipse(8, 8, 48, 48)
+        painter.drawPath(shield)
+
+        # Draw a checkmark (protected) or an X (unprotected) inside the
+        # shield using a light stroke that reads clearly against both fill
+        # colors at small sizes.
+        stroke_pen = QPen(QColor("white"))
+        stroke_pen.setWidth(5)
+        stroke_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        stroke_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        painter.setPen(stroke_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        if self.is_protected:
+            mark = QPainterPath()
+            mark.moveTo(20, 32)
+            mark.lineTo(28, 40)
+            mark.lineTo(44, 22)
+            painter.drawPath(mark)
+        else:
+            painter.drawLine(25, 25, 39, 39)
+            painter.drawLine(39, 25, 25, 39)
+
         painter.end()
 
         return QIcon(pixmap)

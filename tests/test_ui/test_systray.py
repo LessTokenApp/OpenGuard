@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import pytest
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QColor, QIcon
 from PyQt6.QtWidgets import QMenu
 
 from src.ui.systray import SystemTray
@@ -198,3 +198,78 @@ class TestAnalyticsAction:
         tray.analytics_action.trigger()
 
         assert received, "Analytics menu entry emitted nothing"
+
+
+class TestSystemTrayShieldIcon:
+    """The tray icon must be a shield silhouette, not a plain circle."""
+
+    def test_icon_corner_is_transparent_outside_shield_silhouette(self, qapp):
+        """A shield's top corners are cut away, unlike a circle's bounding box.
+
+        The old `drawEllipse(8, 8, 48, 48)` circle is centered at (32, 32)
+        with radius 24. The new shield's top edge runs from (32, 4) to
+        (10, 12) to (10, 30) -- at x=12 that edge sits at y ~ 11, so a point
+        at (12, 8) is above the shield's outline and must be transparent.
+        """
+        systray = SystemTray()
+        systray.set_protection_status(True)
+
+        image = systray.icon().pixmap(64, 64).toImage()
+        corner_color = image.pixelColor(12, 8)
+
+        assert corner_color.alpha() == 0
+
+    def test_icon_fill_still_reflects_protection_color(self, qapp):
+        """The shield's interior fill must still be green/red as before."""
+        systray = SystemTray()
+
+        systray.set_protection_status(True)
+        protected_image = systray.icon().pixmap(64, 64).toImage()
+        # (32, 50) sits low inside the shield body, clear of any stroke marks.
+        assert protected_image.pixelColor(32, 50).name() == QColor("green").name()
+
+        systray.set_protection_status(False)
+        unprotected_image = systray.icon().pixmap(64, 64).toImage()
+        assert unprotected_image.pixelColor(32, 50).name() == QColor("red").name()
+
+    def test_protected_icon_draws_a_checkmark(self, qapp):
+        """Protected state draws a light checkmark stroke inside the shield."""
+        systray = SystemTray()
+        systray.set_protection_status(True)
+
+        image = systray.icon().pixmap(64, 64).toImage()
+        # (28, 40) is the checkmark's bottom vertex -- squarely on the stroke.
+        mark_color = image.pixelColor(28, 40)
+
+        assert mark_color.red() > 200
+        assert mark_color.green() > 200
+        assert mark_color.blue() > 200
+
+    def test_unprotected_icon_draws_an_x(self, qapp):
+        """Unprotected state draws a light X stroke inside the shield."""
+        systray = SystemTray()
+        systray.set_protection_status(False)
+
+        image = systray.icon().pixmap(64, 64).toImage()
+        # (32, 32) is where the X's two diagonals cross -- squarely on the stroke.
+        mark_color = image.pixelColor(32, 32)
+
+        assert mark_color.red() > 200
+        assert mark_color.green() > 200
+        assert mark_color.blue() > 200
+
+    def test_protected_and_unprotected_icons_differ(self, qapp):
+        """Sanity check that the two states still render distinct pixmaps.
+
+        (14, 20) sits inside the shield's left flank, clear of both the
+        checkmark and the X strokes, so it isolates the fill color.
+        """
+        systray = SystemTray()
+
+        systray.set_protection_status(True)
+        protected_image = systray.icon().pixmap(64, 64).toImage()
+
+        systray.set_protection_status(False)
+        unprotected_image = systray.icon().pixmap(64, 64).toImage()
+
+        assert protected_image.pixelColor(14, 20) != unprotected_image.pixelColor(14, 20)
