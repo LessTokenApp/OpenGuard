@@ -37,6 +37,11 @@ class AnalyticsEngine:
         # Initialize the database
         self._init_database()
 
+        self.log_file = self.db_path.parent / "events.jsonl"
+        self.events: List[Event] = (
+            self.read_jsonl(self.log_file) if Path(self.log_file).exists() else []
+        )
+
     def _init_database(self) -> None:
         """Initialize the SQLite database and create tables if needed."""
         conn = sqlite3.connect(self.db_path)
@@ -87,11 +92,43 @@ class AnalyticsEngine:
                         category=data.get("category", ""),
                     )
                     events.append(event)
-                except (json.JSONDecodeError, KeyError, ValueError) as e:
+                except (json.JSONDecodeError, KeyError, ValueError):
                     # Skip malformed lines
                     continue
 
         return events
+
+    def record(self, event: Event) -> None:
+        """Add an event to the store and write it out.
+
+        Args:
+            event: The event to keep.
+        """
+        self.events.append(event)
+        self.save_events()
+
+    def save_events(self) -> None:
+        """Write the current events to the JSONL log.
+
+        The file is rewritten rather than appended to, so saving twice cannot
+        duplicate an entry.
+        """
+        path = Path(self.log_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(path, "w", encoding="utf-8") as f:
+            for event in self.events:
+                f.write(
+                    json.dumps(
+                        {
+                            "timestamp": event.timestamp.isoformat(),
+                            "event": event.event,
+                            "severity": event.severity,
+                            "category": event.category,
+                        }
+                    )
+                    + "\n"
+                )
 
     def ingest_to_sqlite(self, events: List[Event]) -> int:
         """Ingest events into the SQLite database.

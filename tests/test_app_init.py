@@ -123,7 +123,9 @@ class TestOpenGuardAppRun:
         Args:
             qapp: pytest-qt fixture for QApplication
         """
-        # Create a mock main window
+        # Build the real UI first, then stand in for the window, so the rest of
+        # the application is wired the way run() expects.
+        qapp.setup_ui()
         mock_window = MagicMock()
         qapp.main_window = mock_window
 

@@ -307,7 +307,7 @@ class TestFirstRunOnboarding:
 
     def test_wizard_is_created_on_a_first_run(self, qapp, monkeypatch, tmp_path):
         """The wizard must be built and shown, not merely available."""
-        qapp.onboarding_wizard = None
+        qapp.setup_ui()
         monkeypatch.setattr(qapp.config_manager, "config_path", tmp_path / "absent" / "config.yaml")
 
         qapp.maybe_show_onboarding()
@@ -316,7 +316,7 @@ class TestFirstRunOnboarding:
 
     def test_wizard_is_skipped_when_config_exists(self, qapp, monkeypatch, tmp_path):
         """Returning users must not be sent through setup again."""
-        qapp.onboarding_wizard = None
+        qapp.setup_ui()
         existing = tmp_path / "config.yaml"
         existing.write_text("firewall_level: Moderate\n")
         monkeypatch.setattr(qapp.config_manager, "config_path", existing)
@@ -327,7 +327,7 @@ class TestFirstRunOnboarding:
 
     def test_completing_the_wizard_persists_its_choices(self, qapp, monkeypatch, tmp_path):
         """Answers given during setup must be adopted and written out."""
-        qapp.onboarding_wizard = None
+        qapp.setup_ui()
         monkeypatch.setattr(qapp.config_manager, "config_path", tmp_path / "absent" / "config.yaml")
         saved = []
         monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: saved.append(s) or True)
