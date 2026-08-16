@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
 
     toggle_protection_clicked = pyqtSignal()
 
-    def __init__(self) -> None:
+    def __init__(self, dark_mode: bool = True) -> None:
         """Initialize the main window.
 
         Sets up:
@@ -40,12 +40,15 @@ class MainWindow(QMainWindow):
         - Toggle protection button
         - Persistent disclaimer label
         - Activity log for recent events
+
+        Args:
+            dark_mode: Whether to render the window with the dark theme.
         """
         super().__init__()
 
         self.setWindowTitle("OpenGuard")
         self.setGeometry(100, 100, 800, 600)
-        self.setStyleSheet(get_stylesheet(dark_mode=True))
+        self.setStyleSheet(get_stylesheet(dark_mode=dark_mode))
 
         # Create central widget
         central_widget = QWidget()

@@ -28,11 +28,14 @@ class OnboardingWizard(QWizard):
 
     completed = pyqtSignal(Settings)
 
-    def __init__(self) -> None:
+    def __init__(self, dark_mode: bool = True) -> None:
         """Initialize the onboarding wizard.
 
         Sets up 4-page wizard with welcome, protection info, firewall
         selection, and completion screens.
+
+        Args:
+            dark_mode: Whether to render the wizard with the dark theme.
         """
         super().__init__()
         self.setWindowTitle("OpenGuard Setup")
@@ -41,7 +44,7 @@ class OnboardingWizard(QWizard):
         # background that stylesheets cannot reach, so the dark theme's text
         # color ends up unreadable. ModernStyle honours the stylesheet.
         self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
-        self.setStyleSheet(get_stylesheet(dark_mode=True))
+        self.setStyleSheet(get_stylesheet(dark_mode=dark_mode))
 
         # Add pages
         self.page1 = self.create_welcome_page()

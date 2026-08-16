@@ -10,12 +10,14 @@ import subprocess
 import pytest
 from PyQt6.QtCore import QTimer
 
+from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
 from src.models.settings import Settings
 from src.ui.analytics_modal import AnalyticsModal
 from src.ui.main_window import MainWindow
 from src.ui.onboarding_wizard import OnboardingWizard
 from src.ui.settings_dialog import SettingsDialog
+from src.ui.styles import get_stylesheet
 from src.ui.systray import SystemTray
 
 
@@ -370,3 +372,118 @@ class TestActivityIsReported:
         )
 
         assert "trafiği şifrelemez" in qapp.main_window.activity_log.toPlainText()
+
+
+class TestThemeFollowsSettings:
+    """Settings.dark_mode persisted correctly but never affected the rendered UI.
+
+    Every UI class hardcoded dark_mode=True at its get_stylesheet() call site,
+    so unchecking Dark Mode and saving produced no visible change anywhere.
+    """
+
+    def test_setup_ui_applies_the_configured_dark_mode(self, qapp, monkeypatch):
+        """A saved light-mode preference must produce a light-themed window from launch."""
+        monkeypatch.setattr(ConfigManager, "load_config", lambda self: Settings(dark_mode=False))
+
+        qapp.setup_ui()
+
+        assert qapp.main_window.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_setup_ui_applies_the_configured_dark_mode_to_the_tray(self, qapp, monkeypatch):
+        """The tray menu must also start themed according to the saved preference."""
+        monkeypatch.setattr(ConfigManager, "load_config", lambda self: Settings(dark_mode=False))
+
+        qapp.setup_ui()
+
+        assert qapp.system_tray.tray_menu.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_settings_dialog_opens_using_the_settings_at_open_time(self, qapp):
+        """The dialog is created lazily; it must read dark_mode as of the open, not launch."""
+        qapp.setup_ui()
+        qapp.settings.dark_mode = False
+
+        qapp.system_tray.settings_clicked.emit()
+
+        assert qapp.settings_dialog.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_analytics_modal_opens_using_the_settings_at_open_time(self, qapp):
+        """The modal is created lazily; it must read dark_mode as of the open, not launch."""
+        qapp.setup_ui()
+        qapp.settings.dark_mode = False
+
+        qapp.system_tray.analytics_clicked.emit()
+
+        assert qapp.analytics_modal.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_onboarding_wizard_opens_using_the_current_dark_mode(self, qapp, monkeypatch, tmp_path):
+        """The wizard is only constructed on a first run; it must still honour the setting."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "config_path", tmp_path / "absent" / "config.yaml")
+        qapp.settings.dark_mode = False
+
+        qapp.maybe_show_onboarding()
+
+        assert qapp.onboarding_wizard.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_saving_a_flipped_dark_mode_retheme_the_open_main_window_live(self, qapp, monkeypatch):
+        """Saving Settings with Dark Mode unchecked must re-theme the already-open window.
+
+        This is the core regression test: main_window.styleSheet() must actually
+        change as a result of the save, without the window being reconstructed.
+        """
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        original_window = qapp.main_window
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.dark_mode_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.main_window is original_window, "window was reconstructed instead of re-themed"
+        assert qapp.main_window.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_saving_a_flipped_dark_mode_retheme_the_tray_menu_live(self, qapp, monkeypatch):
+        """Saving Settings with Dark Mode unchecked must re-theme the already-open tray menu."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.dark_mode_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.system_tray.tray_menu.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_saving_back_to_dark_mode_retheme_live_too(self, qapp, monkeypatch):
+        """The re-theming must work symmetrically, not just for the light-mode direction."""
+        monkeypatch.setattr(ConfigManager, "load_config", lambda self: Settings(dark_mode=False))
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.dark_mode_check.setChecked(True)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.main_window.styleSheet() == get_stylesheet(dark_mode=True)
+
+    def test_saving_retheme_the_cached_settings_dialog(self, qapp, monkeypatch):
+        """The settings dialog itself is cached across opens and must be re-themed too."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.dark_mode_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.settings_dialog.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_saving_retheme_the_cached_analytics_modal(self, qapp, monkeypatch):
+        """A previously opened analytics modal is cached and must be re-themed on save too."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.analytics_clicked.emit()
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.dark_mode_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.analytics_modal.styleSheet() == get_stylesheet(dark_mode=False)

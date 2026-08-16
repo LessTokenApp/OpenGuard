@@ -14,6 +14,7 @@ from src.ui.analytics_modal import AnalyticsModal
 from src.ui.main_window import MainWindow
 from src.ui.onboarding_wizard import OnboardingWizard
 from src.ui.settings_dialog import SettingsDialog
+from src.ui.styles import get_stylesheet
 from src.ui.systray import SystemTray
 
 
@@ -72,9 +73,9 @@ class OpenGuardApp(QApplication):
         self.analytics_engine = AnalyticsEngine()
 
         self.hardening_manager = HardeningManager()
-        self.main_window = MainWindow()
+        self.main_window = MainWindow(dark_mode=self.settings.dark_mode)
 
-        self.system_tray = SystemTray()
+        self.system_tray = SystemTray(dark_mode=self.settings.dark_mode)
 
         self.main_window.toggle_protection_clicked.connect(self._on_toggle_requested)
         self.system_tray.toggle_clicked.connect(self._on_toggle_requested)
@@ -119,21 +120,39 @@ class OpenGuardApp(QApplication):
     def _on_settings_requested(self) -> None:
         """Open the settings dialog, creating it on first use."""
         if self.settings_dialog is None:
-            self.settings_dialog = SettingsDialog(initial_settings=self.settings)
+            self.settings_dialog = SettingsDialog(
+                initial_settings=self.settings, dark_mode=self.settings.dark_mode
+            )
             self.settings_dialog.settings_changed.connect(self._on_settings_saved)
 
         self.settings_dialog.show()
         self.settings_dialog.raise_()
 
     def _on_settings_saved(self) -> None:
-        """Adopt and persist the preferences edited in the dialog."""
+        """Adopt and persist the preferences edited in the dialog.
+
+        Also re-applies the theme live to the already-open, long-lived widgets
+        (the main window and the tray menu) so a Dark Mode change takes effect
+        immediately rather than only the next time those widgets are rebuilt.
+        """
         self.settings = self.settings_dialog.get_settings()
         self.config_manager.save_config(self.settings)
+
+        stylesheet = get_stylesheet(dark_mode=self.settings.dark_mode)
+        self.main_window.setStyleSheet(stylesheet)
+        self.system_tray.tray_menu.setStyleSheet(stylesheet)
+
+        # Dialogs created lazily on first open are cached; re-theme the cached
+        # instance too so the setting takes effect immediately if it's still open.
+        if self.settings_dialog is not None:
+            self.settings_dialog.setStyleSheet(stylesheet)
+        if self.analytics_modal is not None:
+            self.analytics_modal.setStyleSheet(stylesheet)
 
     def _on_analytics_requested(self) -> None:
         """Open the analytics dialog, creating it on first use."""
         if self.analytics_modal is None:
-            self.analytics_modal = AnalyticsModal()
+            self.analytics_modal = AnalyticsModal(dark_mode=self.settings.dark_mode)
 
         self.analytics_modal.set_events(self.session_events)
         self.analytics_modal.show()
@@ -155,7 +174,7 @@ class OpenGuardApp(QApplication):
         if not self.is_first_run():
             return
 
-        self.onboarding_wizard = OnboardingWizard()
+        self.onboarding_wizard = OnboardingWizard(dark_mode=self.settings.dark_mode)
         self.onboarding_wizard.completed.connect(self._on_onboarding_completed)
         self.onboarding_wizard.show()
 

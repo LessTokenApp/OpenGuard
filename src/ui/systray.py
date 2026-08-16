@@ -29,13 +29,16 @@ class SystemTray(QSystemTrayIcon):
     analytics_clicked = pyqtSignal()
     exit_clicked = pyqtSignal()
 
-    def __init__(self) -> None:
+    def __init__(self, dark_mode: bool = True) -> None:
         """Initialize the system tray icon.
 
         Sets up:
         - Tray icon with protected status (green)
         - Context menu with all required actions
         - Tooltip showing status and activity
+
+        Args:
+            dark_mode: Whether to render the tray menu with the dark theme.
         """
         super().__init__()
 
@@ -44,7 +47,7 @@ class SystemTray(QSystemTrayIcon):
 
         # Create context menu
         self.tray_menu = QMenu()
-        self._setup_menu()
+        self._setup_menu(dark_mode=dark_mode)
 
         # Set the menu
         self.setContextMenu(self.tray_menu)
@@ -65,10 +68,14 @@ class SystemTray(QSystemTrayIcon):
         self._update_tooltip()
         self._update_menu()
 
-    def _setup_menu(self) -> None:
-        """Set up the context menu with all required actions."""
+    def _setup_menu(self, dark_mode: bool = True) -> None:
+        """Set up the context menu with all required actions.
+
+        Args:
+            dark_mode: Whether to render the tray menu with the dark theme.
+        """
         # Apply stylesheet to the menu (QMenu is a QWidget, QSystemTrayIcon is not)
-        self.tray_menu.setStyleSheet(get_stylesheet(dark_mode=True))
+        self.tray_menu.setStyleSheet(get_stylesheet(dark_mode=dark_mode))
 
         # Status indicator (read-only)
         self.status_action = self.tray_menu.addAction("🟢 Protected")

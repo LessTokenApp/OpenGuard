@@ -12,11 +12,11 @@ from src.ui.styles import get_stylesheet
 class AnalyticsModal(QDialog):
     """Analytics viewer - FREE basic / PRO advanced"""
 
-    def __init__(self, is_pro: bool = False):
+    def __init__(self, is_pro: bool = False, dark_mode: bool = True):
         super().__init__()
         self.setWindowTitle("Analytics Dashboard")
         self.setGeometry(200, 200, 600, 500)
-        self.setStyleSheet(get_stylesheet(dark_mode=True))
+        self.setStyleSheet(get_stylesheet(dark_mode=dark_mode))
         self.is_pro = is_pro
 
         layout = QVBoxLayout()

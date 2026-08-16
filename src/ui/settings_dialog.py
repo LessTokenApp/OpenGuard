@@ -36,17 +36,20 @@ class SettingsDialog(QDialog):
 
     settings_changed = pyqtSignal()
 
-    def __init__(self, initial_settings: Optional[Settings] = None) -> None:
+    def __init__(
+        self, initial_settings: Optional[Settings] = None, dark_mode: bool = True
+    ) -> None:
         """Initialize the settings dialog.
 
         Args:
             initial_settings: Optional Settings object to populate the dialog with.
                             If None, uses Settings defaults.
+            dark_mode: Whether to render the dialog with the dark theme.
         """
         super().__init__()
         self.setWindowTitle("Settings")
         self.setGeometry(200, 200, 500, 400)
-        self.setStyleSheet(get_stylesheet(dark_mode=True))
+        self.setStyleSheet(get_stylesheet(dark_mode=dark_mode))
 
         if initial_settings is None:
             self.settings = Settings()

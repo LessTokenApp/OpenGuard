@@ -13,6 +13,7 @@ from src.ui.main_window import MainWindow
 from src.ui.settings_dialog import SettingsDialog
 from src.ui.onboarding_wizard import OnboardingWizard
 from src.ui.analytics_modal import AnalyticsModal
+from src.ui.systray import SystemTray
 
 
 class TestColorConstants:
@@ -145,6 +146,37 @@ class TestMainWindowStylesheet:
         stylesheet = window.styleSheet()
         assert "QMainWindow" in stylesheet
 
+    def test_main_window_dark_mode_true_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=True must match get_stylesheet(dark_mode=True).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow(dark_mode=True)
+        assert window.styleSheet() == get_stylesheet(dark_mode=True)
+
+    def test_main_window_dark_mode_false_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=False must match get_stylesheet(dark_mode=False).
+
+        This is the regression test for the bug where every call site hardcoded
+        dark_mode=True regardless of the constructor argument.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow(dark_mode=False)
+        assert window.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_main_window_dark_mode_true_and_false_differ(self, qapp):
+        """The two themes must actually be different stylesheets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dark = MainWindow(dark_mode=True)
+        light = MainWindow(dark_mode=False)
+        assert dark.styleSheet() != light.styleSheet()
+
 
 class TestSettingsDialogStylesheet:
     """Test that SettingsDialog has stylesheet applied."""
@@ -177,6 +209,25 @@ class TestSettingsDialogStylesheet:
         dialog = SettingsDialog()
         stylesheet = dialog.styleSheet()
         assert "QDialog" in stylesheet
+
+    def test_settings_dialog_dark_mode_false_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=False must match get_stylesheet(dark_mode=False).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dialog = SettingsDialog(dark_mode=False)
+        assert dialog.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_settings_dialog_dark_mode_true_and_false_differ(self, qapp):
+        """The two themes must actually be different stylesheets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dark = SettingsDialog(dark_mode=True)
+        light = SettingsDialog(dark_mode=False)
+        assert dark.styleSheet() != light.styleSheet()
 
 
 class TestOnboardingWizardStylesheet:
@@ -211,6 +262,25 @@ class TestOnboardingWizardStylesheet:
         stylesheet = wizard.styleSheet()
         # QWizard inherits from QDialog, so should have QDialog style
         assert "QDialog" in stylesheet
+
+    def test_onboarding_wizard_dark_mode_false_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=False must match get_stylesheet(dark_mode=False).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        wizard = OnboardingWizard(dark_mode=False)
+        assert wizard.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_onboarding_wizard_dark_mode_true_and_false_differ(self, qapp):
+        """The two themes must actually be different stylesheets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dark = OnboardingWizard(dark_mode=True)
+        light = OnboardingWizard(dark_mode=False)
+        assert dark.styleSheet() != light.styleSheet()
 
 
 class TestAnalyticsModalStylesheet:
@@ -253,6 +323,69 @@ class TestAnalyticsModalStylesheet:
         """
         modal = AnalyticsModal(is_pro=True)
         assert modal.styleSheet() != ""
+
+    def test_analytics_modal_dark_mode_false_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=False must match get_stylesheet(dark_mode=False).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        modal = AnalyticsModal(dark_mode=False)
+        assert modal.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_analytics_modal_dark_mode_true_and_false_differ(self, qapp):
+        """The two themes must actually be different stylesheets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dark = AnalyticsModal(dark_mode=True)
+        light = AnalyticsModal(dark_mode=False)
+        assert dark.styleSheet() != light.styleSheet()
+
+
+class TestSystemTrayStylesheet:
+    """Test that SystemTray's tray menu has stylesheet applied."""
+
+    def test_tray_menu_has_stylesheet(self, qapp):
+        """Test that the tray context menu has a stylesheet applied.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        tray = SystemTray()
+        assert tray.tray_menu.styleSheet() != ""
+
+    def test_tray_menu_dark_mode_true_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=True must match get_stylesheet(dark_mode=True).
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        tray = SystemTray(dark_mode=True)
+        assert tray.tray_menu.styleSheet() == get_stylesheet(dark_mode=True)
+
+    def test_tray_menu_dark_mode_false_matches_get_stylesheet(self, qapp):
+        """Constructing with dark_mode=False must match get_stylesheet(dark_mode=False).
+
+        This is the regression test for the bug where SystemTray._setup_menu()
+        hardcoded dark_mode=True regardless of the desired theme.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        tray = SystemTray(dark_mode=False)
+        assert tray.tray_menu.styleSheet() == get_stylesheet(dark_mode=False)
+
+    def test_tray_menu_dark_mode_true_and_false_differ(self, qapp):
+        """The two themes must actually be different stylesheets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dark = SystemTray(dark_mode=True)
+        light = SystemTray(dark_mode=False)
+        assert dark.tray_menu.styleSheet() != light.tray_menu.styleSheet()
 
 
 class TestStylesheetContent:
