@@ -37,7 +37,7 @@ MinVersion=10.0.22000
 ChangesAssociations=no
 WizardStyle=modern
 UninstallDisplayIcon={app}\OpenGuard.exe
-SetupIconFile=installer\openguard.ico
+SetupIconFile=installer\icon.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
