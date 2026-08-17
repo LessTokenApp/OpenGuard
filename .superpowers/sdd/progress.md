@@ -2,7 +2,7 @@
 
 **Plan:** docs/superpowers/plans/2026-08-04-openguard-v0.7-implementation.md  
 **Start:** 2026-08-04  
-**Status:** IN PROGRESS (Week 2-3 / Task 5)
+**Status:** v0.7.0 core plan complete (16/16) + Task 17 post-release fix ✅
 
 ---
 
@@ -22,26 +22,51 @@
 
 ### Week 4: Backend Integration
 - [x] Task 9: HardeningManager (PowerShell IPC) ✅ (commit f555d68, review clean)
-- [x] Task 10: AnalyticsEngine (JSONL → SQLite) ✅ (commit 98e2e67, 30 tests passing)
-- [ ] Task 11: ConfigManager (YAML I/O)
-- [ ] Task 12: ProcessMonitor (Watch PowerShell)
+- [x] Task 10: AnalyticsEngine (JSONL → SQLite) ✅ (commit 98e2e67, review clean)
+- [x] Task 11: ConfigManager (YAML I/O) ✅ (commit 8afc365, review clean)
+- [x] Task 12: ProcessMonitor (Watch PowerShell) ✅ (commit bd6ca12, review clean)
 
 ### Week 5: Integration & Testing
-- [ ] Task 13: Integration Testing (UI + Backend)
-- [ ] Task 14: Installer Setup (Inno Setup)
+- [x] Task 13: Integration Testing (UI + Backend) ✅ (commit 9c8a43b)
+- [x] Task 14: Installer Setup (Inno Setup) ✅ (commit c794f43)
 
 ### Week 6: Release
-- [ ] Task 15: Documentation
-- [ ] Task 16: Release Prep & v0.7.0 Tag
+- [x] Task 15: Documentation ✅ (commits 88703e5, ea88776)
+- [x] Task 16: Release Prep & v0.7.0 Tag ✅ (commit d7d2b56, tag v0.7.0)
+
+### Post-release fixes (found via live testing on real machine)
+- [x] fix: stop claiming protection before any has been applied (commit e2b5cfa)
+- [x] fix: give the PowerShell backend a callable entry point (commit 10de3f4)
+- [x] fix: base protection status on evidence OpenGuard actually left behind (commit 8c91fdd)
+- [x] Task 17: surface hardening risk advisory (VPN/antivirus disclaimer) in GUI ✅ (commits fb65ba8, fix d180ebc, review clean — safety/honesty-critical: GUI previously showed a bare green "Protection enabled" without OpenGuard.ps1's own disclaimer that it does not encrypt traffic or eliminate MITM risk)
+- [x] feat: keep the activity log after the window closes (commit 691005b — applied outside the subagent-driven-development workflow, not independently reviewed)
+- [x] Task 18: stop counting self-generated system events (protection toggle, advisory, errors) as detected threats ✅ (commit 3b7675e, review clean — safety/honesty-critical: found live when toggling protection 6 times during testing produced "Threats Blocked: 6, Risk: HIGH" with zero actual attacks, because AnalyticsModal/AnalyticsEngine counted any WARN/ERROR event regardless of category; ProcessMonitor from Task 12 is still not wired into src/app.py, so no real threat detector exists yet — risk stats now correctly read 0/LOW until one is)
+
+- [x] Task 19: correct onboarding wizard completion screen ("Protection is now ON" was false — finishing the wizard only saves Settings, never calls enable_hardening()) ✅ (commit f66f6c0, review clean — project owner chose wording fix over auto-enabling hardening on wizard finish)
+
+- [x] fix: rename Settings dialog "Analytics" tab to "Logging" ✅ (commit 717df77 — resolved naming collision with systray's separate "📊 Analytics" menu item)
+- [x] Task 20: wire Settings.dark_mode into the actual rendered theme, including live re-theming of already-open windows on save ✅ (commit c0cb1e2, review clean — Dark Mode checkbox previously persisted to disk but had zero visual effect, every get_stylesheet() call site was hardcoded dark_mode=True)
+
+- [x] Task 21: replace systray's plain circle icon with a shield silhouette (green+checkmark protected, red+X unprotected) ✅ (commit d61ee6b, review clean — approved with two non-blocking notes: the shield silhouette itself isn't independently pinned by a dedicated test beyond the mark-presence tests, and one reported test-count delta included in-flight unrelated changes)
+- [x] Task 22: generate installer/icon.ico (green shield + Cinzel "OG" monogram + checkmark badge, 256x256 multi-res) ✅ (commit 2573dfd, review clean — the file Task 14's brief required but never got; font bundled at installer/assets/fonts/Cinzel-Bold.ttf, OFL-licensed)
+- [x] fix: point installer.iss and BUILD.md at the real branding icon, retire the undesigned openguard.ico placeholder ✅ (commit 91e9cf8)
+- [x] Task 23: theme SettingsDialog's QTabWidget tab page bodies (found live immediately after Task 20 — dialog frame correctly followed dark_mode, but tab page content stayed Qt's native gray regardless of theme; root cause was get_stylesheet() never targeting plain QWidget tab pages, same class of issue already fixed for QWizardPage) ✅ (commit f0aced7, review clean — QWidget#tabPage objectName-scoped selector, verified live by pixel-sampling both themes)
+- [x] fix: retire the undesigned installer/openguard.ico placeholder, repoint installer.iss + BUILD.md at the real icon.ico ✅ (commit 91e9cf8 — Task 14's implementer named its placeholder openguard.ico instead of following its own brief's icon.ico filename; Task 22 correctly built icon.ico per spec but couldn't repoint installer.iss/BUILD.md, out of its scope)
+- [x] housekeeping: moved 4 stray task report files (task-12, 13, 14, 16) from repo root into .superpowers/sdd/ (gitignored scratch dir), where they belonged — left uncommitted/untracked at root since some point in Week 4-6, never cleaned up
+
+### Known gaps identified during guided live walkthrough (2026-08-17), not yet fixed
+- ProcessMonitor (Task 12) exists and is tested in isolation but is never imported/instantiated in src/app.py — no real threat detection is wired into the running application yet.
+- Onboarding wizard and Settings dialog are English-only; main window disclaimer (Task 17) and activity log advisory text are Turkish. Project constraint states "Turkish UI, English code" but localization was explicitly deferred early in the project and remains incomplete. Not addressed by Task 19 (out of scope by design).
 
 ---
 
 ## Completed Tasks
 
-(None yet — Task 1 in progress)
+All 16 planned tasks + Task 17 (post-release safety fix) complete and review-approved. v0.7.0 verified working end-to-end on a real Windows machine (admin-elevated hardening enable/disable cycle confirmed via registry check).
 
 ---
 
 ## Known Issues / Minor Findings
 
 - Task 5: unused `import pytest` in tests/test_ui/test_settings_dialog.py after app fixture removal (trivial, non-blocking; flag for final whole-branch review cleanup pass)
+- Commit 691005b ("keep the activity log after the window closes") was made outside the tracked subagent-driven-development review workflow — no review record exists for it. Worth a lightweight pass if a formal audit trail matters before shipping.
