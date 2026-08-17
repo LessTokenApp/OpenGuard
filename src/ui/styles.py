@@ -45,6 +45,19 @@ def get_stylesheet(dark_mode: bool = True) -> str:
             color: {text};
         }}
 
+        /* SettingsDialog's tab pages (Protection/Logging/Appearance) are
+           plain QWidget instances added via QTabWidget.addTab(). A bare
+           QWidget doesn't inherit or paint a stylesheet-driven background
+           from an ancestor's rule -- it needs a selector that matches it
+           directly (and WA_STYLED_BACKGROUND set on the widget itself, see
+           SettingsDialog._create_*_tab()) or it keeps Qt's native gray.
+           Scoped to objectName "tabPage" rather than a bare QWidget rule so
+           this doesn't unexpectedly restyle QComboBox/QSpinBox/etc. */
+        QWidget#tabPage {{
+            background-color: {bg};
+            color: {text};
+        }}
+
         QRadioButton, QCheckBox {{
             color: {text};
             spacing: 6px;

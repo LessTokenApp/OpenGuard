@@ -420,3 +420,35 @@ class TestStylesheetContent:
         """Test that light mode has appropriate border color."""
         result = get_stylesheet(dark_mode=False)
         assert "#E5E7EB" in result
+
+
+class TestTabPageStylesheet:
+    """Test that the stylesheet covers SettingsDialog's QTabWidget page bodies.
+
+    Plain QWidget instances (like the ones SettingsDialog adds via
+    self.tabs.addTab()) don't automatically paint a stylesheet-driven
+    background unless a rule specifically targets them (mirroring the
+    existing QWizard/QWizardPage fix above). This covers the scoped
+    QWidget#tabPage selector added for that.
+    """
+
+    def test_stylesheet_contains_tabpage_selector(self):
+        """Test that the stylesheet has a rule scoped to the tab page objectName."""
+        result = get_stylesheet()
+        assert "QWidget#tabPage" in result
+
+    def test_tabpage_selector_dark_mode_background(self):
+        """Test that the tab page rule uses the dark background color in dark mode."""
+        result = get_stylesheet(dark_mode=True)
+        # Isolate the QWidget#tabPage rule block and check it carries the
+        # dark background color, not just that the color appears somewhere else.
+        start = result.index("QWidget#tabPage")
+        block = result[start : start + 200]
+        assert "#1F2937" in block
+
+    def test_tabpage_selector_light_mode_background(self):
+        """Test that the tab page rule uses the light background color in light mode."""
+        result = get_stylesheet(dark_mode=False)
+        start = result.index("QWidget#tabPage")
+        block = result[start : start + 200]
+        assert "#FFFFFF" in block

@@ -251,6 +251,31 @@ class TestInitialSettings:
         assert settings.retention_days == 30
 
 
+class TestSettingsDialogTabPageTheming:
+    """Test that the tab page bodies are wired up to actually receive theming.
+
+    Task 20 wired dark_mode into SettingsDialog's own stylesheet, but the
+    QWidget instances returned by _create_*_tab() and added via
+    self.tabs.addTab() don't inherit a painted background from that
+    stylesheet unless they carry a selector-matching objectName (a plain
+    QWidget needs an explicit rule to paint stylesheet backgrounds at all).
+    """
+
+    def test_all_tab_pages_have_tabpage_object_name(self, qapp):
+        """Every tab page widget must expose the objectName the CSS rule targets.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        dialog = SettingsDialog()
+        for index in range(dialog.tabs.count()):
+            page = dialog.tabs.widget(index)
+            assert page.objectName() == "tabPage", (
+                f"tab page at index {index} has objectName "
+                f"{page.objectName()!r}, expected 'tabPage'"
+            )
+
+
 class TestSettingsDialogSignals:
     """Test signal emissions from settings dialog."""
 

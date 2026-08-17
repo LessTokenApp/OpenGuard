@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -111,6 +111,8 @@ class SettingsDialog(QDialog):
             QWidget: The protection tab widget
         """
         widget = QWidget()
+        widget.setObjectName("tabPage")
+        widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         v_layout = QVBoxLayout()
 
         # Firewall Level
@@ -154,6 +156,8 @@ class SettingsDialog(QDialog):
             QWidget: The analytics tab widget
         """
         widget = QWidget()
+        widget.setObjectName("tabPage")
+        widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         v_layout = QVBoxLayout()
 
         self.analytics_enabled_check = QCheckBox("Auto-log events")
@@ -183,6 +187,8 @@ class SettingsDialog(QDialog):
             QWidget: The appearance tab widget
         """
         widget = QWidget()
+        widget.setObjectName("tabPage")
+        widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         v_layout = QVBoxLayout()
 
         self.dark_mode_check = QCheckBox("Dark Mode")
