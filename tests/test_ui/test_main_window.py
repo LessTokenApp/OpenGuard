@@ -80,6 +80,27 @@ class TestStatusCard:
         button = window.get_toggle_button()
         assert button.text() in ["Enable Protection", "Disable Protection"]
 
+    def test_settings_button_exists(self, qapp):
+        """Test that a Settings button exists in the window.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        button = window.get_settings_button()
+        assert button is not None
+        assert isinstance(button, QPushButton)
+
+    def test_settings_button_text(self, qapp):
+        """Test that the Settings button is labeled "Settings".
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        button = window.get_settings_button()
+        assert button.text() == "Settings"
+
 
 class TestActivityLog:
     """Test activity log functionality."""
@@ -215,6 +236,41 @@ class TestSignals:
         qtbot.mouseClick(button, Qt.MouseButton.LeftButton)
 
         # Signal should have been emitted
+        assert signal_emitted
+
+    def test_settings_clicked_signal_exists(self, qapp):
+        """Test that settings_clicked signal exists.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+        """
+        window = MainWindow()
+        assert hasattr(window, "settings_clicked")
+        # Check that it's a pyqtSignal
+        assert hasattr(window.settings_clicked, "emit")
+
+    def test_settings_clicked_signal_emission(self, qapp, qtbot):
+        """Test that the settings button emits settings_clicked when clicked.
+
+        Mirrors test_toggle_protection_signal_emission for the new button.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt bot for simulating user interactions
+        """
+        window = MainWindow()
+        button = window.get_settings_button()
+
+        signal_emitted = False
+
+        def on_settings():
+            nonlocal signal_emitted
+            signal_emitted = True
+
+        window.settings_clicked.connect(on_settings)
+
+        qtbot.mouseClick(button, Qt.MouseButton.LeftButton)
+
         assert signal_emitted
 
 

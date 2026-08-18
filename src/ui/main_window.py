@@ -27,9 +27,11 @@ class MainWindow(QMainWindow):
 
     Signals:
         toggle_protection_clicked: Emitted when toggle button is clicked
+        settings_clicked: Emitted when the Settings button is clicked
     """
 
     toggle_protection_clicked = pyqtSignal()
+    settings_clicked = pyqtSignal()
 
     def __init__(self, dark_mode: bool = True) -> None:
         """Initialize the main window.
@@ -72,6 +74,14 @@ class MainWindow(QMainWindow):
         self.toggle_button = QPushButton("Disable Protection")
         self.toggle_button.clicked.connect(self._on_toggle_clicked)
         status_layout.addWidget(self.toggle_button)
+
+        # Settings button. This is the only entry point to SettingsDialog that
+        # does not depend on the systray, so it must stay visible and enabled
+        # regardless of Settings.systray_enabled -- disabling the tray must
+        # never lock a user out of Settings.
+        self.settings_button = QPushButton("Settings")
+        self.settings_button.clicked.connect(self._on_settings_button_clicked)
+        status_layout.addWidget(self.settings_button)
 
         main_layout.addLayout(status_layout)
 
@@ -148,12 +158,27 @@ class MainWindow(QMainWindow):
         """
         return self.toggle_button
 
+    def get_settings_button(self) -> QPushButton:
+        """Get the Settings button.
+
+        Returns:
+            QPushButton: The Settings button
+        """
+        return self.settings_button
+
     def _on_toggle_clicked(self) -> None:
         """Handle toggle button click event.
 
         Emits the toggle_protection_clicked signal.
         """
         self.toggle_protection_clicked.emit()
+
+    def _on_settings_button_clicked(self) -> None:
+        """Handle Settings button click event.
+
+        Emits the settings_clicked signal.
+        """
+        self.settings_clicked.emit()
 
     def _apply_severity_color(self, severity: str) -> None:
         """Apply color formatting to activity log based on severity.

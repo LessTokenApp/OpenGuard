@@ -80,6 +80,7 @@ class OpenGuardApp(QApplication):
         self.system_tray = SystemTray(dark_mode=self.settings.dark_mode)
 
         self.main_window.toggle_protection_clicked.connect(self._on_toggle_requested)
+        self.main_window.settings_clicked.connect(self._on_settings_requested)
         self.system_tray.toggle_clicked.connect(self._on_toggle_requested)
         self.system_tray.settings_clicked.connect(self._on_settings_requested)
         self.system_tray.analytics_clicked.connect(self._on_analytics_requested)

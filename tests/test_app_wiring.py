@@ -260,6 +260,45 @@ class TestSettingsDialogIsReachable:
         assert saved, "edited settings were never persisted"
 
 
+class TestSettingsDialogIsReachableFromMainWindow:
+    """Task 25 made Settings.systray_enabled hide the tray icon live, which made
+    the tray's "⚙️ Settings" menu item the *only* way to reopen Settings once a
+    user disabled the tray and saved. MainWindow now has its own Settings
+    button wired to the same handler, so this must not be the only path.
+    """
+
+    def test_main_window_settings_click_opens_the_dialog(self, qapp):
+        """Clicking Settings on the main window must open the same dialog the tray does."""
+        qapp.setup_ui()
+
+        qapp.main_window.settings_clicked.emit()
+
+        assert isinstance(qapp.settings_dialog, SettingsDialog)
+
+    def test_main_window_settings_button_still_works_with_systray_disabled(
+        self, qapp, monkeypatch
+    ):
+        """The regression this task exists to prevent.
+
+        With systray_enabled=False (as it would be after a user disabled and
+        saved it per Task 25), the tray icon is hidden and offers no menu at
+        all. MainWindow's Settings button must remain present, enabled, and
+        must still open SettingsDialog through the real app.py wiring.
+        """
+        monkeypatch.setattr(
+            ConfigManager, "load_config", lambda self: Settings(systray_enabled=False)
+        )
+        qapp.setup_ui()
+
+        assert qapp.system_tray.isVisible() is False
+        button = qapp.main_window.get_settings_button()
+        assert button.isEnabled()
+
+        qapp.main_window.settings_clicked.emit()
+
+        assert isinstance(qapp.settings_dialog, SettingsDialog)
+
+
 class TestAnalyticsIsReachable:
     """AnalyticsModal was implemented and tested but nothing could open it."""
 
