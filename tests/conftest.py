@@ -19,14 +19,24 @@ def stub_process_monitor_subprocess(monkeypatch):
     infinite-loop PowerShell child process that nothing in the suite ever
     terminates.
 
-    process_monitor.py calls the shared, global `subprocess` module, the same
-    one other tests use to shell out to real powershell.exe (e.g.
-    test_powershell_scripts_parse.py via subprocess.run(), which uses Popen
-    internally, and whose command line also happens to mention the literal
-    string "OpenGuard.ps1" as a path argument). So this only stubs the exact
-    polling-loop command ProcessMonitor launches ("while ($true) { ... }",
-    unique to it) and passes every other call through to the real
-    subprocess.Popen unchanged.
+    `src.core.process_monitor.subprocess` is the same module object as the
+    global `subprocess` (Python caches modules by name), so
+    monkeypatch.setattr below replaces subprocess.Popen process-wide, not
+    just within process_monitor.py. The real scoping comes entirely from the
+    fake_popen() content check, not from the dotted attribute path: it only
+    intercepts calls whose command contains the literal "while ($true)"
+    polling loop unique to ProcessMonitor.start_monitoring(), and passes
+    every other call (e.g. HardeningManager's and
+    test_powershell_scripts_parse.py's, which shell out to real
+    powershell.exe with OpenGuard.ps1 passed as a file path, never inlined
+    as command text) through to the real subprocess.Popen unchanged.
+
+    This is coincidentally safe today because no current call site inlines
+    a script's raw text into a Popen command — if a future test ever did
+    that for a script containing a literal "while ($true)" loop (one already
+    exists in OpenGuard.ps1's own source, just never passed this way), it
+    would be silently intercepted too. Match on something more specific to
+    ProcessMonitor's own command if that ever becomes a real conflict.
     """
     import subprocess as subprocess_module
 
