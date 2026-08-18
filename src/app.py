@@ -146,7 +146,9 @@ class OpenGuardApp(QApplication):
 
         Also re-applies the theme live to the already-open, long-lived widgets
         (the main window and the tray menu) so a Dark Mode change takes effect
-        immediately rather than only the next time those widgets are rebuilt.
+        immediately rather than only the next time those widgets are rebuilt,
+        and shows or hides the tray icon so a System tray integration change
+        takes effect immediately too, rather than only on the next launch.
         """
         self.settings = self.settings_dialog.get_settings()
         self.config_manager.save_config(self.settings)
@@ -161,6 +163,15 @@ class OpenGuardApp(QApplication):
             self.settings_dialog.setStyleSheet(stylesheet)
         if self.analytics_modal is not None:
             self.analytics_modal.setStyleSheet(stylesheet)
+
+        # isVisible() is the tray icon's own source of truth, so acting only
+        # on a change avoids a redundant show()/hide() when the setting was
+        # saved unchanged.
+        if self.settings.systray_enabled:
+            if not self.system_tray.isVisible():
+                self.system_tray.show()
+        elif self.system_tray.isVisible():
+            self.system_tray.hide()
 
     def _on_analytics_requested(self) -> None:
         """Open the analytics dialog, creating it on first use."""

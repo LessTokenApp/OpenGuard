@@ -572,3 +572,67 @@ class TestThemeFollowsSettings:
         qapp.settings_dialog.settings_changed.emit()
 
         assert qapp.analytics_modal.styleSheet() == get_stylesheet(dark_mode=False)
+
+
+class TestSystrayEnabledFollowsSettings:
+    """Settings.systray_enabled persisted correctly but never affected the live tray icon.
+
+    setup_ui() only reads it once, at launch, to decide whether to call
+    system_tray.show(). Toggling "System tray integration" in Settings and
+    saving had no live effect until the app was restarted.
+    """
+
+    def test_saving_settings_with_systray_disabled_hides_the_live_tray_icon(
+        self, qapp, monkeypatch
+    ):
+        """Unchecking the tray checkbox and saving must hide the already-shown tray icon.
+
+        This is the core regression test: system_tray.isVisible() must actually
+        change as a result of the save.
+        """
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        assert qapp.system_tray.isVisible() is True
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.systray_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.system_tray.isVisible() is False
+
+    def test_saving_settings_with_systray_enabled_shows_the_hidden_tray_icon(
+        self, qapp, monkeypatch
+    ):
+        """Re-checking the tray checkbox and saving must show a previously hidden tray icon."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.hide()
+        assert qapp.system_tray.isVisible() is False
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.systray_check.setChecked(True)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.system_tray.isVisible() is True
+
+    def test_saving_settings_with_systray_left_enabled_is_a_no_op(self, qapp, monkeypatch):
+        """Saving with the checkbox unchanged (True -> True) must not error and must stay visible."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.settings_clicked.emit()
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.system_tray.isVisible() is True
+
+    def test_saving_settings_with_systray_left_disabled_is_a_no_op(self, qapp, monkeypatch):
+        """Saving with the checkbox unchanged (False -> False) must not error and stay hidden."""
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        qapp.system_tray.hide()
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.systray_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert qapp.system_tray.isVisible() is False
