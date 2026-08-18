@@ -11,6 +11,7 @@ from datetime import datetime
 import pytest
 from PyQt6.QtCore import QTimer
 
+import src.app
 from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
 from src.core.process_monitor import ProcessMonitor
@@ -611,6 +612,49 @@ class TestThemeFollowsSettings:
         qapp.settings_dialog.settings_changed.emit()
 
         assert qapp.analytics_modal.styleSheet() == get_stylesheet(dark_mode=False)
+
+
+class TestAutoStartFollowsSettings:
+    """Settings.auto_start persisted correctly but never registered/removed a
+    real Windows startup entry - it was purely cosmetic. Task 27 wires
+    startup_manager.apply() into both the initial reconciliation on launch
+    and the live save path, mirroring dark_mode (Task 20) and systray_enabled
+    (Task 25).
+    """
+
+    def test_setup_ui_reconciles_startup_registration_with_loaded_settings(
+        self, qapp, monkeypatch
+    ):
+        """setup_ui() must call startup_manager.apply() with the loaded auto_start value.
+
+        Patching the module-level function before setup_ui() runs means this
+        only passes if the real app.py code path calls it; deleting the
+        apply() call in setup_ui() would fail this test.
+        """
+        monkeypatch.setattr(
+            ConfigManager, "load_config", lambda self: Settings(auto_start=False)
+        )
+        calls = []
+        monkeypatch.setattr(src.app.startup_manager, "apply", lambda enabled: calls.append(enabled))
+
+        qapp.setup_ui()
+
+        assert calls == [False]
+
+    def test_saving_settings_reapplies_startup_registration_live(self, qapp, monkeypatch):
+        """Flipping auto_start in the dialog and saving must call apply() again
+        through the real _on_settings_saved() path with the new value.
+        """
+        qapp.setup_ui()
+        monkeypatch.setattr(qapp.config_manager, "save_config", lambda s: True)
+        calls = []
+        monkeypatch.setattr(src.app.startup_manager, "apply", lambda enabled: calls.append(enabled))
+        qapp.system_tray.settings_clicked.emit()
+        qapp.settings_dialog.auto_start_check.setChecked(False)
+
+        qapp.settings_dialog.settings_changed.emit()
+
+        assert calls == [False]
 
 
 class TestSystrayEnabledFollowsSettings:

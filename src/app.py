@@ -5,6 +5,7 @@ from datetime import datetime
 
 from PyQt6.QtWidgets import QApplication
 
+from src.core import startup_manager
 from src.core.analytics_engine import AnalyticsEngine
 from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
@@ -103,6 +104,11 @@ class OpenGuardApp(QApplication):
         if self.settings.systray_enabled:
             self.system_tray.show()
 
+        # Reconcile the actual Windows startup registration with the
+        # loaded/default setting on every launch, the same pattern used for
+        # dark_mode (Task 20) and systray_enabled above (Task 25).
+        startup_manager.apply(self.settings.auto_start)
+
         # App-lifetime monitoring: HardeningManager.enable_hardening()/
         # disable_hardening() are short-lived synchronous subprocess.run()
         # calls that return after the PowerShell script has already exited,
@@ -173,6 +179,10 @@ class OpenGuardApp(QApplication):
                 self.system_tray.show()
         elif self.system_tray.isVisible():
             self.system_tray.hide()
+
+        # Toggling Auto-start on login and saving must take effect
+        # immediately, the same as dark_mode and systray_enabled above.
+        startup_manager.apply(self.settings.auto_start)
 
     def _on_analytics_requested(self) -> None:
         """Open the analytics dialog, creating it on first use."""
