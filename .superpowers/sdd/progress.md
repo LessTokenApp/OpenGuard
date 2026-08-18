@@ -59,9 +59,9 @@
 - [x] Task 26: give MainWindow its own Settings button, wired to the same _on_settings_requested handler the tray uses ✅ (commit d9423c4, review clean — closes a real usability trap Task 25 made newly reachable: before Task 25, systray_enabled had no live effect so Settings was always reachable via the tray regardless of the checkbox; after Task 25, a user could disable the tray and permanently lock themselves out of Settings with no other entry point anywhere in the app)
 - [x] Task 27: make Settings.auto_start register/unregister a real Windows startup entry (HKCU Run key), was purely cosmetic before ✅ (commit d615bdc, review clean — new src/core/startup_manager.py, no-op when not running as a frozen PyInstaller build since there's no single correct executable to register from source)
 - [x] housekeeping: commit the stale task-14-report.md deletion at repo root (already duplicated correctly in .superpowers/sdd/ since an earlier pass; left uncommitted since before this session started) ✅ (commit 1cfc961)
+- [x] Task 28: wire the systray's "Help" menu item (previously a no-op with no signal at all) to open the GitHub repo in the default browser ✅ (commit 28cc61f, review clean)
 
-### Known gaps identified during guided live walkthrough (2026-08-17), not yet fixed
-- The systray's "Help" menu item is a no-op (`_on_help_clicked` is `pass`).
+### Known gaps, not yet fixed (all require the project owner's own money/identity/accounts, or were explicitly deferred — not pursued autonomously)
 - Onboarding wizard and Settings dialog remain English-only; main window disclaimer (Task 17) and activity log advisory text are Turkish. Project constraint states "Turkish UI, English code" but localization was explicitly deferred early in the project and remains incomplete.
 - No code-signing certificate — installer triggers Windows SmartScreen "unknown publisher" warnings. Discussed with project owner; Azure Trusted Signing (~$120/year, individual-eligible) identified as the most fitting option, not yet purchased/applied.
 - Not distributed via winget/Chocolatey/Microsoft Store — GitHub Releases is currently the only channel.
