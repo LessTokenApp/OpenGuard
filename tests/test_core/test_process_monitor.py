@@ -112,8 +112,14 @@ class TestStartMonitoring:
         assert call_kwargs["stdin"] == subprocess.PIPE
 
     @patch("src.core.process_monitor.subprocess.Popen")
-    def test_start_monitoring_with_stdout_pipe(self, mock_popen, qapp):
-        """Test start_monitoring creates subprocess with stdout pipe.
+    def test_start_monitoring_with_stdout_devnull(self, mock_popen, qapp):
+        """stdout must be discarded, not piped.
+
+        Nothing ever reads self._process.stdout. On Windows, once the child's
+        stdout pipe buffer fills, the child blocks on write and never
+        terminates cleanly except via .terminate(). Since the polling loop's
+        output isn't consumed for anything, it must be launched with
+        stdout=subprocess.DEVNULL rather than subprocess.PIPE.
 
         Args:
             mock_popen: Mocked subprocess.Popen
@@ -127,10 +133,30 @@ class TestStartMonitoring:
         monitor = ProcessMonitor()
         monitor.start_monitoring()
 
-        # Verify stdout is set to PIPE
+        # Verify stdout is set to DEVNULL, not PIPE
         call_kwargs = mock_popen.call_args[1]
         assert "stdout" in call_kwargs
-        assert call_kwargs["stdout"] == subprocess.PIPE
+        assert call_kwargs["stdout"] == subprocess.DEVNULL
+
+    @patch("src.core.process_monitor.subprocess.Popen")
+    def test_start_monitoring_with_stderr_devnull(self, mock_popen, qapp):
+        """stderr must also be discarded, not piped, for the same reason as stdout.
+
+        Args:
+            mock_popen: Mocked subprocess.Popen
+            qapp: pytest-qt fixture for QApplication
+        """
+        # Setup mock
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_popen.return_value = mock_process
+
+        monitor = ProcessMonitor()
+        monitor.start_monitoring()
+
+        call_kwargs = mock_popen.call_args[1]
+        assert "stderr" in call_kwargs
+        assert call_kwargs["stderr"] == subprocess.DEVNULL
 
     @patch("src.core.process_monitor.subprocess.Popen")
     def test_start_monitoring_already_running(self, mock_popen, qapp):
@@ -435,6 +461,105 @@ class TestEventGeneration:
                 category="test",
             )
             assert event.severity == severity
+
+
+class TestBookkeepingEventsUseSystemCategory:
+    """ProcessMonitor's own start/stop bookkeeping events are self-generated
+    administrative events, not detected threats.
+
+    Per the convention established in src/app.py's _log() and relied on by
+    AnalyticsEngine.get_24h_risk_score()/get_threat_timeline() and
+    AnalyticsModal._update_display() (see commit 3b7675e / Task 18),
+    category="system" means "not a detected threat" and is excluded from
+    threat/risk counts. Using category="process_monitor" here would let an
+    ERROR-severity bookkeeping event (e.g. a failure to start the monitoring
+    subprocess) be miscounted as a real detected threat.
+    """
+
+    @patch("src.core.process_monitor.subprocess.Popen")
+    def test_start_monitoring_success_event_uses_system_category(self, mock_popen, qapp):
+        """The event emitted when monitoring starts successfully must be category="system".
+
+        Args:
+            mock_popen: Mocked subprocess.Popen
+            qapp: pytest-qt fixture for QApplication
+        """
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_popen.return_value = mock_process
+
+        monitor = ProcessMonitor()
+        captured = []
+        monitor.new_events.connect(lambda events: captured.extend(events))
+
+        monitor.start_monitoring()
+
+        assert captured, "no event was emitted"
+        assert captured[0].category == "system"
+
+    @patch("src.core.process_monitor.subprocess.Popen")
+    def test_start_monitoring_failure_event_uses_system_category(self, mock_popen, qapp):
+        """The event emitted when starting monitoring fails must be category="system".
+
+        Args:
+            mock_popen: Mocked subprocess.Popen
+            qapp: pytest-qt fixture for QApplication
+        """
+        mock_popen.side_effect = Exception("Process error")
+
+        monitor = ProcessMonitor()
+        captured = []
+        monitor.new_events.connect(lambda events: captured.extend(events))
+
+        monitor.start_monitoring()
+
+        assert captured, "no event was emitted"
+        assert captured[0].category == "system"
+
+    @patch("src.core.process_monitor.subprocess.Popen")
+    def test_stop_monitoring_success_event_uses_system_category(self, mock_popen, qapp):
+        """The event emitted when monitoring stops successfully must be category="system".
+
+        Args:
+            mock_popen: Mocked subprocess.Popen
+            qapp: pytest-qt fixture for QApplication
+        """
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_popen.return_value = mock_process
+
+        monitor = ProcessMonitor()
+        monitor.start_monitoring()
+        captured = []
+        monitor.new_events.connect(lambda events: captured.extend(events))
+
+        monitor.stop_monitoring()
+
+        assert captured, "no event was emitted"
+        assert captured[0].category == "system"
+
+    @patch("src.core.process_monitor.subprocess.Popen")
+    def test_stop_monitoring_failure_event_uses_system_category(self, mock_popen, qapp):
+        """The event emitted when stopping monitoring fails must be category="system".
+
+        Args:
+            mock_popen: Mocked subprocess.Popen
+            qapp: pytest-qt fixture for QApplication
+        """
+        mock_process = MagicMock()
+        mock_process.poll.return_value = None
+        mock_process.terminate.side_effect = Exception("Termination error")
+        mock_popen.return_value = mock_process
+
+        monitor = ProcessMonitor()
+        monitor.start_monitoring()
+        captured = []
+        monitor.new_events.connect(lambda events: captured.extend(events))
+
+        monitor.stop_monitoring()
+
+        assert captured, "no event was emitted"
+        assert captured[0].category == "system"
 
 
 class TestProcessMonitorIntegration:

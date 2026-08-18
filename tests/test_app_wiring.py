@@ -6,12 +6,15 @@ tests cover the wiring itself.
 """
 
 import subprocess
+from datetime import datetime
 
 import pytest
 from PyQt6.QtCore import QTimer
 
 from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
+from src.core.process_monitor import ProcessMonitor
+from src.models.event import Event
 from src.models.settings import Settings
 from src.ui.analytics_modal import AnalyticsModal
 from src.ui.main_window import MainWindow
@@ -372,6 +375,88 @@ class TestActivityIsReported:
         )
 
         assert "trafiği şifrelemez" in qapp.main_window.activity_log.toPlainText()
+
+
+class TestProcessMonitorIsWired:
+    """ProcessMonitor (Task 12) existed and was unit-tested in isolation but
+    was never instantiated anywhere in app.py, so it never actually ran.
+    """
+
+    def test_setup_ui_creates_a_process_monitor(self, qapp):
+        """setup_ui() must leave the app holding a real ProcessMonitor."""
+        qapp.setup_ui()
+
+        assert isinstance(qapp.process_monitor, ProcessMonitor)
+
+    def test_setup_ui_starts_monitoring(self, qapp, monkeypatch):
+        """start_monitoring() must actually be called, not merely available.
+
+        Patching the class method (before setup_ui() creates the instance)
+        means this only passes if the real app.py code path calls it; deleting
+        the .start_monitoring() call in setup_ui() would fail this test.
+        """
+        started = []
+        monkeypatch.setattr(
+            ProcessMonitor, "start_monitoring", lambda self: started.append(True)
+        )
+
+        qapp.setup_ui()
+
+        assert started, "setup_ui() never started process monitoring"
+
+    def test_process_monitor_events_appended_to_the_activity_log(self, qapp):
+        """new_events emitted on the real, app-wired ProcessMonitor must reach the log.
+
+        Mirrors test_hardening_advisory_appended_to_the_activity_log (Task 17,
+        commit d180ebc): the signal is emitted on qapp.process_monitor itself,
+        the real attribute setup_ui() wires up, not a throwaway instance.
+        """
+        qapp.setup_ui()
+        qapp.main_window.activity_log.clear()
+
+        qapp.process_monitor.new_events.emit(
+            [
+                Event(
+                    timestamp=datetime.now(),
+                    event="Process monitoring started for OpenGuard.ps1",
+                    severity="SUCCESS",
+                    category="system",
+                )
+            ]
+        )
+
+        assert "Process monitoring started" in qapp.main_window.activity_log.toPlainText()
+
+    def test_process_monitor_events_are_recorded_for_analytics(self, qapp):
+        """Events from the real, app-wired ProcessMonitor must also be retained for analytics."""
+        qapp.setup_ui()
+        qapp.session_events.clear()
+
+        qapp.process_monitor.new_events.emit(
+            [
+                Event(
+                    timestamp=datetime.now(),
+                    event="Process monitoring stopped for OpenGuard.ps1",
+                    severity="SUCCESS",
+                    category="system",
+                )
+            ]
+        )
+
+        assert qapp.session_events, "process monitor events were never recorded for analytics"
+
+    def test_exit_requested_stops_monitoring(self, qapp, monkeypatch):
+        """_on_exit_requested() must stop process monitoring before quitting."""
+        qapp.setup_ui()
+        stopped = []
+        monkeypatch.setattr(
+            qapp.process_monitor, "stop_monitoring", lambda: stopped.append(True)
+        )
+        monkeypatch.setattr(qapp, "quit", lambda: None)
+
+        qapp._on_exit_requested()
+
+        assert stopped, "_on_exit_requested() never stopped process monitoring"
 
 
 class TestThemeFollowsSettings:

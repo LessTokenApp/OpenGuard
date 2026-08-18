@@ -65,8 +65,8 @@ class ProcessMonitor(QObject):
             self._process = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 text=True,
             )
 
@@ -77,7 +77,7 @@ class ProcessMonitor(QObject):
                 timestamp=datetime.now(),
                 event="Process monitoring started for OpenGuard.ps1",
                 severity="SUCCESS",
-                category="process_monitor",
+                category="system",
             )
             self.new_events.emit([event])
 
@@ -87,7 +87,7 @@ class ProcessMonitor(QObject):
                 timestamp=datetime.now(),
                 event=f"Failed to start process monitoring: {str(e)}",
                 severity="ERROR",
-                category="process_monitor",
+                category="system",
             )
             self.new_events.emit([error_event])
 
@@ -112,7 +112,7 @@ class ProcessMonitor(QObject):
                 timestamp=datetime.now(),
                 event="Process monitoring stopped for OpenGuard.ps1",
                 severity="SUCCESS",
-                category="process_monitor",
+                category="system",
             )
             self.new_events.emit([event])
 
@@ -122,7 +122,7 @@ class ProcessMonitor(QObject):
                 timestamp=datetime.now(),
                 event=f"Error stopping process monitoring: {str(e)}",
                 severity="ERROR",
-                category="process_monitor",
+                category="system",
             )
             self.new_events.emit([error_event])
             self.is_monitoring = False

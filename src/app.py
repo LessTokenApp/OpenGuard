@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QApplication
 from src.core.analytics_engine import AnalyticsEngine
 from src.core.config_manager import ConfigManager
 from src.core.hardening_manager import HardeningManager
+from src.core.process_monitor import ProcessMonitor
 from src.models.event import Event
 from src.models.settings import Settings
 from src.ui.analytics_modal import AnalyticsModal
@@ -50,6 +51,7 @@ class OpenGuardApp(QApplication):
         self.analytics_modal: AnalyticsModal | None = None
         self.onboarding_wizard: OnboardingWizard | None = None
         self.analytics_engine: AnalyticsEngine | None = None
+        self.process_monitor: ProcessMonitor | None = None
 
     @property
     def session_events(self) -> list[Event]:
@@ -89,6 +91,9 @@ class OpenGuardApp(QApplication):
         self.hardening_manager.error_occurred.connect(self._on_error)
         self.hardening_manager.advisory_raised.connect(self._on_advisory)
 
+        self.process_monitor = ProcessMonitor()
+        self.process_monitor.new_events.connect(self._on_process_monitor_events)
+
         # Both widgets default to showing protection as active. Nothing has run
         # at this point, so publish the manager's real state before the window
         # is ever seen rather than claiming safety that was never applied.
@@ -96,6 +101,14 @@ class OpenGuardApp(QApplication):
 
         if self.settings.systray_enabled:
             self.system_tray.show()
+
+        # App-lifetime monitoring: HardeningManager.enable_hardening()/
+        # disable_hardening() are short-lived synchronous subprocess.run()
+        # calls that return after the PowerShell script has already exited,
+        # so there is no meaningful "protection is currently active" window
+        # to tie ProcessMonitor's own start/stop to. It runs for as long as
+        # the application does instead.
+        self.process_monitor.start_monitoring()
 
     def _on_toggle_requested(self) -> None:
         """Enable or disable hardening depending on the current state.
@@ -194,6 +207,7 @@ class OpenGuardApp(QApplication):
 
         Indirect so the call resolves at emit time rather than at connect time.
         """
+        self.process_monitor.stop_monitoring()
         self.quit()
 
     def _on_status_changed(self, is_protected: bool) -> None:
@@ -224,6 +238,20 @@ class OpenGuardApp(QApplication):
             advisory_text: Advisory text from the hardening backend.
         """
         self._log(advisory_text, "WARN")
+
+    def _on_process_monitor_events(self, events: list[Event]) -> None:
+        """Record and display events reported by the process monitor.
+
+        Duplicates the record+display logic in _log() rather than calling it,
+        since _log() builds its own Event from a (description, severity) pair
+        and does not accept a pre-built Event.
+
+        Args:
+            events: Events emitted by ProcessMonitor.
+        """
+        for event in events:
+            self.analytics_engine.record(event)
+            self.main_window.add_activity_log_entry(event)
 
     def _log(self, description: str, severity: str) -> None:
         """Append an entry to the activity log.
