@@ -185,6 +185,20 @@ class TestSystemTraySignals:
             # Trigger the exit action
             systray.exit_action.trigger()
 
+    def test_help_action_emits_signal(self, qapp, qtbot):
+        """Test that help menu action emits help_clicked signal.
+
+        Args:
+            qapp: pytest-qt fixture for QApplication
+            qtbot: pytest-qt robot fixture
+        """
+        systray = SystemTray()
+
+        # Connect to the signal to capture emissions
+        with qtbot.waitSignal(systray.help_clicked, timeout=1000):
+            # Trigger the help action
+            systray.help_action.trigger()
+
 
 class TestAnalyticsAction:
     """The Analytics menu entry existed but its handler was a stub."""

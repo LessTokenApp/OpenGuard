@@ -236,6 +236,30 @@ class TestSystemTrayIsWired:
         assert quit_calls
 
 
+class TestHelpIsReachable:
+    """The tray's "? Help" menu entry existed but its handler was a no-op."""
+
+    def test_help_request_opens_the_project_page(self, qapp, monkeypatch):
+        """Choosing Help from the tray must open the GitHub repo in the browser.
+
+        Patching QDesktopServices.openUrl on src.app (where it is imported and
+        called) rather than on a throwaway SystemTray instance means this only
+        passes if the real setup_ui() code path actually wires
+        system_tray.help_clicked to a handler that calls it; deleting the
+        .connect(...) call in setup_ui() would fail this test.
+        """
+        calls = []
+        monkeypatch.setattr(
+            src.app.QDesktopServices, "openUrl", lambda url: calls.append(url)
+        )
+        qapp.setup_ui()
+
+        qapp.system_tray.help_clicked.emit()
+
+        assert len(calls) == 1
+        assert calls[0].toString() == "https://github.com/LessTokenApp/OpenGuard"
+
+
 class TestSettingsDialogIsReachable:
     """SettingsDialog was implemented and tested but had no entry point."""
 

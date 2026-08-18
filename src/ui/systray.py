@@ -21,12 +21,14 @@ class SystemTray(QSystemTrayIcon):
         toggle_clicked: Emitted when toggle protection action is selected
         settings_clicked: Emitted when settings action is selected
         analytics_clicked: Emitted when the analytics action is selected
+        help_clicked: Emitted when the help action is selected
         exit_clicked: Emitted when exit action is selected
     """
 
     toggle_clicked = pyqtSignal()
     settings_clicked = pyqtSignal()
     analytics_clicked = pyqtSignal()
+    help_clicked = pyqtSignal()
     exit_clicked = pyqtSignal()
 
     def __init__(self, dark_mode: bool = True) -> None:
@@ -220,10 +222,9 @@ class SystemTray(QSystemTrayIcon):
     def _on_help_clicked(self) -> None:
         """Handle help action.
 
-        Reserved for future implementation.
+        Emits the help_clicked signal.
         """
-        # Future implementation: show help dialog or documentation
-        pass
+        self.help_clicked.emit()
 
     def _on_exit_clicked(self) -> None:
         """Handle exit action.

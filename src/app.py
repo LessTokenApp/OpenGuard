@@ -3,6 +3,8 @@
 import sys
 from datetime import datetime
 
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import QApplication
 
 from src.core import startup_manager
@@ -85,6 +87,7 @@ class OpenGuardApp(QApplication):
         self.system_tray.toggle_clicked.connect(self._on_toggle_requested)
         self.system_tray.settings_clicked.connect(self._on_settings_requested)
         self.system_tray.analytics_clicked.connect(self._on_analytics_requested)
+        self.system_tray.help_clicked.connect(self._on_help_requested)
         self.system_tray.exit_clicked.connect(self._on_exit_requested)
 
         self.hardening_manager.status_changed.connect(self.main_window.set_protection_status)
@@ -192,6 +195,10 @@ class OpenGuardApp(QApplication):
         self.analytics_modal.set_events(self.session_events)
         self.analytics_modal.show()
         self.analytics_modal.raise_()
+
+    def _on_help_requested(self) -> None:
+        """Open the project's GitHub page in the user's default browser."""
+        QDesktopServices.openUrl(QUrl("https://github.com/LessTokenApp/OpenGuard"))
 
     def is_first_run(self) -> bool:
         """Report whether this looks like the user's first launch.
