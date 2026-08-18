@@ -55,17 +55,17 @@
 - [x] housekeeping: moved 4 stray task report files (task-12, 13, 14, 16) from repo root into .superpowers/sdd/ (gitignored scratch dir), where they belonged — left uncommitted/untracked at root since some point in Week 4-6, never cleaned up
 
 - [x] Task 24: wire ProcessMonitor into the running app, fix pipe leak (stdout/stderr now DEVNULL not PIPE) and category bug (its own start/stop/error bookkeeping now category="system", was "process_monitor" which would have miscounted as a real threat under Task 18's filter) ✅ (commit 26f1056, review clean, docstring follow-up 9413852 — explicitly does NOT add real threat-detection logic; it only reflects whether the monitoring subprocess itself is alive, confirmed with project owner as the deliberate scope)
+- [x] Task 25: make Settings.systray_enabled take effect live on save (was only read once at setup_ui() time, same "declared but not live-wired" pattern Task 20 fixed for dark_mode, never applied here) ✅ (commit 9937ec6, review clean)
+- [x] Task 26: give MainWindow its own Settings button, wired to the same _on_settings_requested handler the tray uses ✅ (commit d9423c4, review clean — closes a real usability trap Task 25 made newly reachable: before Task 25, systray_enabled had no live effect so Settings was always reachable via the tray regardless of the checkbox; after Task 25, a user could disable the tray and permanently lock themselves out of Settings with no other entry point anywhere in the app)
 
 ### Known gaps identified during guided live walkthrough (2026-08-17), not yet fixed
 - `Settings.auto_start` persists to config.yaml and is shown in the UI but is never used anywhere to actually create/remove a Windows startup entry (Registry Run key or Startup folder shortcut) — the checkbox is currently cosmetic.
-- `Settings.systray_enabled` is only read once at `setup_ui()` time (`if self.settings.systray_enabled: self.system_tray.show()`) — toggling it in Settings and saving has no live effect until the app is restarted, the same "declared but not live-wired" pattern Task 20 fixed for dark_mode, never applied here.
 - The systray's "Help" menu item is a no-op (`_on_help_clicked` is `pass`).
-- Onboarding wizard and Settings dialog remain English-only (pre-existing, already-acknowledged localization gap).
+- Onboarding wizard and Settings dialog remain English-only; main window disclaimer (Task 17) and activity log advisory text are Turkish. Project constraint states "Turkish UI, English code" but localization was explicitly deferred early in the project and remains incomplete.
 - No code-signing certificate — installer triggers Windows SmartScreen "unknown publisher" warnings. Discussed with project owner; Azure Trusted Signing (~$120/year, individual-eligible) identified as the most fitting option, not yet purchased/applied.
 - Not distributed via winget/Chocolatey/Microsoft Store — GitHub Releases is currently the only channel.
 - No auto-update mechanism.
 - Pro-tier UI exists as a stub (AnalyticsModal's "Upgrade" text) with no real payment/licensing backend — matches the original spec's explicit deferral of monetization to v0.8.0.
-- Onboarding wizard and Settings dialog are English-only; main window disclaimer (Task 17) and activity log advisory text are Turkish. Project constraint states "Turkish UI, English code" but localization was explicitly deferred early in the project and remains incomplete. Not addressed by Task 19 (out of scope by design).
 
 ---
 
